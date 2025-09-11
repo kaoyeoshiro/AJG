@@ -1,0 +1,53 @@
+# ==========================================
+# DEPENDÊNCIAS OBRIGATÓRIAS
+# ==========================================
+
+# Rede e requisições HTTP
+requests>=2.32.0
+
+# Parser de XML (já vem na stdlib, mas garantimos compatibilidade)
+lxml>=5.2.0
+
+# Variáveis de ambiente (.env)
+python-dotenv>=1.0.1
+
+# GUI (Tkinter já vem com o Python em Windows e Mac;
+# no Linux pode precisar: sudo apt install python3-tk)
+tk
+
+# ==========================================
+# DEPENDÊNCIAS OPCIONAIS - EXPORTAÇÃO
+# ==========================================
+
+# PDF generation (básico)
+reportlab>=4.0.0
+
+# Processamento de imagens (para templates com imagens)
+Pillow>=10.0.0
+
+# DOCX generation (Word documents) - RECOMENDADO
+python-docx>=1.1.0
+
+# DOCX to PDF conversion (alternativa ao LibreOffice) - RECOMENDADO  
+docx2pdf>=0.1.8
+
+# PDF generation avançado (direto do markdown) - OPCIONAL
+weasyprint>=61.0
+
+# ==========================================
+# INSTALAÇÃO
+# ==========================================
+# 
+# Mínimo (funcional, só RTF):
+#   pip install requests lxml python-dotenv reportlab
+#
+# Recomendado (com DOCX e PDF):
+#   pip install -r requirements.txt
+#   OU execute: install_optional.bat
+#
+# Alternativas para PDF:
+#   1. python-docx (sempre funciona)
+#   2. weasyprint (boa qualidade)  
+#   3. LibreOffice (máxima qualidade)
+#
+# ==========================================
