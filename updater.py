@@ -15,7 +15,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional, Dict, Any
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 # Configurações do repositório
 REPO_OWNER = "kaoyeoshiro"
