@@ -79,14 +79,23 @@ Adicione os seguintes campos **EXATAMENTE** nesta ordem:
 3. Na aba **"Console"**, cole e execute este código:
 
 ```javascript
-// Código para extrair IDs dos campos
-document.querySelectorAll('[name^="entry."]').forEach(field => {
-    const label = field.closest('[data-params]')?.querySelector('[data-params] span')?.textContent || 
-                  field.closest('div')?.querySelector('span')?.textContent ||
-                  'Campo não identificado';
-    console.log(`${label}: ${field.name}`);
+document.querySelectorAll('[name^="entry."]').forEach(function(field, index) {
+    console.log('Campo ' + (index + 1) + ': ' + field.name);
 });
 ```
+
+**MÉTODO ALTERNATIVO** (copie linha por linha se necessário):
+```javascript
+var campos = document.querySelectorAll('[name^="entry."]');
+for (var i = 0; i < campos.length; i++) {
+    console.log('Campo ' + (i + 1) + ': ' + campos[i].name);
+}
+```
+
+**MÉTODO MANUAL** (se os códigos não funcionarem):
+1. Pressione **F12** → aba **"Elements"**
+2. Pressione **Ctrl+F** e procure por: `entry.`
+3. Anote manualmente cada `name="entry.XXXXXXXXXX"` que encontrar
 
 4. **ANOTE** os IDs que aparecerem no console. Deve ser algo como:
    ```

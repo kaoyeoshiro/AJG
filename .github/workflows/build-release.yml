@@ -1,0 +1,80 @@
+name: Build and Release EXE
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create release after build'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Verify config
+      run: |
+        python -c "import config; print('✅ Config OK')"
+
+    - name: Build executable
+      run: |
+        python build_exe.py
+
+    - name: Create version file
+      run: |
+        $version = if ($env:GITHUB_REF -match "refs/tags/(.*)") { $matches[1] } else { "v1.0.$env:GITHUB_RUN_NUMBER" }
+        $version | Out-File -FilePath "dist/VERSION" -Encoding utf8
+        echo "VERSION=$version" >> $env:GITHUB_ENV
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: RelatorioTJMS-${{ env.VERSION }}
+        path: |
+          dist/RelatorioTJMS.exe
+          dist/VERSION
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.create_release == 'true')
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ env.VERSION }}
+        name: RelatorioTJMS ${{ env.VERSION }}
+        body: |
+          🚀 **Nova versão do Sistema de Relatórios TJ-MS**
+
+          ## 📥 Download
+          - Baixe o arquivo `RelatorioTJMS.exe`
+          - Execute direto no Windows (não precisa instalar)
+
+          ## ✨ Atualizações
+          - Build automático #${{ github.run_number }}
+          - Gerado automaticamente do commit: ${{ github.sha }}
+
+          ---
+          🤖 Build automatizado via GitHub Actions
+        files: |
+          dist/RelatorioTJMS.exe
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
