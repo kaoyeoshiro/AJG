@@ -6,7 +6,8 @@
       "WebFetch(domain:github.com)",
       "Bash(git add:*)",
       "Bash(git push:*)",
-      "Bash(del .env)"
+      "Bash(del .env)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
