@@ -31,13 +31,25 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
+    - name: Prepare build config
+      run: |
+        # Se não há secret configurado, usa placeholder para build
+        $apiKey = "${{ secrets.OPENROUTER_API_KEY }}"
+        if ([string]::IsNullOrEmpty($apiKey)) {
+          Write-Host "⚠️ OPENROUTER_API_KEY não configurado - usando placeholder"
+          $apiKey = "GITHUB_BUILD_PLACEHOLDER"
+        } else {
+          Write-Host "✅ OPENROUTER_API_KEY configurado"
+        }
+        echo "OPENROUTER_API_KEY=$apiKey" >> $env:GITHUB_ENV
+
     - name: Verify config
       run: |
         python -c "import config; print('✅ Config OK')"
 
     - name: Build executable
       env:
-        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENROUTER_API_KEY: ${{ env.OPENROUTER_API_KEY }}
       run: |
         python build_exe.py
 
@@ -68,9 +80,16 @@ jobs:
           - Baixe o arquivo `RelatorioTJMS.exe`
           - Execute direto no Windows (não precisa instalar)
 
+          ## ⚙️ Configuração Necessária
+          **IMPORTANTE:** Para usar o executável, você precisa configurar sua chave OpenRouter:
+          1. Obtenha uma chave em: https://openrouter.ai/keys
+          2. Edite o arquivo config.py (linha 57) antes de usar
+          3. Ou use variável de ambiente: `set OPENROUTER_API_KEY=sua-chave`
+
           ## ✨ Atualizações
           - Build automático #${{ github.run_number }}
           - Gerado automaticamente do commit: ${{ github.sha }}
+          - Sistema de auto-atualização integrado
 
           ---
           🤖 Build automatizado via GitHub Actions

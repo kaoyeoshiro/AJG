@@ -53,7 +53,7 @@ if not OPENROUTER_API_KEY:
         pass
 
 # Para executável compilado: substitua "SUA_CHAVE_AQUI" pela chave real antes de compilar
-if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "SUA_CHAVE_AQUI":
+if not OPENROUTER_API_KEY or OPENROUTER_API_KEY in ["SUA_CHAVE_AQUI", "GITHUB_BUILD_PLACEHOLDER"]:
     OPENROUTER_API_KEY = "SUA_CHAVE_AQUI"  # SUBSTITUA AQUI PARA O EXECUTÁVEL
 
 OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"

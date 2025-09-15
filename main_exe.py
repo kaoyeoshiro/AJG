@@ -89,7 +89,9 @@ def validate_config() -> Tuple[bool, str]:
     if not TJ_WSDL_URL: miss.append("TJ_WSDL_URL")
     if not TJ_WS_USER:  miss.append("TJ_WS_USER")
     if not TJ_WS_PASS:  miss.append("TJ_WS_PASS")
-    if not OPENROUTER_API_KEY: miss.append("OPENROUTER_API_KEY")
+    # Permite placeholder durante build/desenvolvimento
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "SUA_CHAVE_AQUI":
+        miss.append("OPENROUTER_API_KEY")
     if miss:
         return False, "Variáveis ausentes no config.py: " + ", ".join(miss)
     return True, "OK"
