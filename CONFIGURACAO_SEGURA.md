@@ -21,19 +21,19 @@ A chave da OpenRouter foi **removida do código** e agora usa variáveis de ambi
 
 ## 🔧 Configuração Local (Desenvolvimento)
 
-### Opção 1: Variável de Ambiente
+### Opção 1: Arquivo .env (RECOMENDADO)
+```bash
+# Crie arquivo .env (já está no .gitignore)
+OPENROUTER_API_KEY=sk-or-v1-sua-chave-aqui
+```
+
+### Opção 2: Variável de Ambiente
 ```bash
 # Windows
 set OPENROUTER_API_KEY=sk-or-v1-sua-chave-aqui
 
 # Linux/Mac
 export OPENROUTER_API_KEY=sk-or-v1-sua-chave-aqui
-```
-
-### Opção 2: Arquivo .env
-```bash
-# Crie arquivo .env (já está no .gitignore)
-echo OPENROUTER_API_KEY=sk-or-v1-sua-chave-aqui > .env
 ```
 
 ### Opção 3: config_local.py

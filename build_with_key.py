@@ -12,27 +12,22 @@ from pathlib import Path
 
 def get_api_key():
     """Obtém a chave API de diferentes fontes"""
-    # 1. Variável de ambiente
-    key = os.getenv("OPENROUTER_API_KEY", "")
-    if key:
-        print(f"✅ Chave encontrada via variável de ambiente: {key[:20]}...")
+    # 1. Importa config (que já carrega .env automaticamente)
+    sys.path.insert(0, ".")
+    import config
+
+    key = config.OPENROUTER_API_KEY
+    if key and key != "SUA_CHAVE_AQUI":
+        print(f"✅ Chave configurada: {key[:20]}...")
         return key
 
-    # 2. config_local.py
-    try:
-        sys.path.insert(0, ".")
-        from config_local import OPENROUTER_API_KEY
-        print(f"✅ Chave encontrada em config_local.py: {OPENROUTER_API_KEY[:20]}...")
-        return OPENROUTER_API_KEY
-    except ImportError:
-        pass
-
-    # 3. Pedir ao usuário
+    # Se não encontrou, pedir ao usuário
     print("⚠️ Chave API não encontrada!")
     print("Você pode:")
-    print("1. Definir variável de ambiente: set OPENROUTER_API_KEY=sua-chave")
-    print("2. Criar config_local.py com: OPENROUTER_API_KEY = 'sua-chave'")
-    print("3. Inserir aqui diretamente (temporário)")
+    print("1. Criar arquivo .env com: OPENROUTER_API_KEY=sua-chave")
+    print("2. Definir variável de ambiente: set OPENROUTER_API_KEY=sua-chave")
+    print("3. Criar config_local.py com: OPENROUTER_API_KEY = 'sua-chave'")
+    print("4. Inserir aqui diretamente (temporário)")
 
     key = input("\nDigite sua chave OpenRouter (sk-or-v1-...): ").strip()
     if not key or not key.startswith("sk-or-v1-"):

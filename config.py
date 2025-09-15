@@ -18,8 +18,28 @@ TJ_WS_PASS = "SAJ03PGEMS"
 # ==================================================
 import os
 
+# Função para carregar arquivo .env
+def load_env_file(env_file=".env"):
+    """Carrega variáveis do arquivo .env se existir"""
+    if os.path.exists(env_file):
+        try:
+            with open(env_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip().strip('"').strip("'")
+                        if key and not os.getenv(key):  # Só define se não existe
+                            os.environ[key] = value
+        except Exception as e:
+            print(f"Aviso: Erro ao carregar .env: {e}")
+
+# Carrega .env primeiro
+load_env_file()
+
 # Tenta carregar de diferentes fontes (ordem de prioridade):
-# 1. Variável de ambiente
+# 1. Variável de ambiente (incluindo .env)
 # 2. Arquivo config_local.py (ignorado pelo git)
 # 3. Definição direta (para executável final)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
