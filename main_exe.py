@@ -47,7 +47,17 @@ try:
     UPDATER_AVAILABLE = True
 except ImportError:
     UPDATER_AVAILABLE = False
-    print("⚠️ Módulo updater não encontrado - funcionalidade de auto-update desabilitada")
+    print("Modulo updater nao encontrado - funcionalidade de auto-update desabilitada")
+
+# =========================
+# Importa gerenciador de chaves
+# =========================
+try:
+    from key_manager import get_api_key, KeyManager
+    KEY_MANAGER_AVAILABLE = True
+except ImportError:
+    KEY_MANAGER_AVAILABLE = False
+    print("Modulo key_manager nao encontrado - usando configuracao estatica")
 
 # =========================
 # Logging (terminal)
@@ -1714,6 +1724,9 @@ class App(tk.Tk):
         # Configurar handler para fechamento da janela
         self.protocol("WM_DELETE_WINDOW", self._on_closing)
 
+        # Verificar chave API na inicialização (após um delay para UI carregar)
+        self.after(500, self._check_api_key_on_startup)
+
     # --- layout ---
     def _build_ui(self):
         top = ttk.Frame(self); top.pack(fill=tk.X, padx=10, pady=8)
@@ -1754,10 +1767,19 @@ class App(tk.Tk):
         self.btn_feedback = ttk.Button(btns, text="⚠️ Reportar Erro no Conteúdo do Relatório", command=self._on_report_error, state="disabled")
         self.btn_feedback.pack(side=tk.LEFT, padx=4)
 
+        # Botões de configuração (lado direito)
+        right_btns = ttk.Frame(btns)
+        right_btns.pack(side=tk.RIGHT)
+
+        # Botão de configuração de chave
+        if KEY_MANAGER_AVAILABLE:
+            self.btn_config_key = ttk.Button(right_btns, text="⚙️ Configurar Chave", command=self._on_config_key)
+            self.btn_config_key.pack(side=tk.LEFT, padx=4)
+
         # Botão de atualização (se disponível)
         if UPDATER_AVAILABLE:
-            self.btn_update = ttk.Button(btns, text="🔄 Verificar Atualizações", command=self._on_check_updates)
-            self.btn_update.pack(side=tk.RIGHT, padx=4)
+            self.btn_update = ttk.Button(right_btns, text="🔄 Verificar Atualizações", command=self._on_check_updates)
+            self.btn_update.pack(side=tk.LEFT, padx=4)
 
         body = ttk.Panedwindow(self, orient=tk.HORIZONTAL); body.pack(fill=tk.BOTH, expand=True, padx=10, pady=8)
 
@@ -2043,6 +2065,65 @@ class App(tk.Tk):
                     pass
 
         threading.Thread(target=check_in_thread, daemon=True).start()
+
+    def _on_config_key(self):
+        """Configura ou reconfigura a chave API"""
+        if not KEY_MANAGER_AVAILABLE:
+            messagebox.showerror("Erro", "Gerenciador de chaves não disponível!", parent=self)
+            return
+
+        try:
+            new_key = get_api_key(parent=self, force_new=True)
+            if new_key:
+                # Atualiza a configuração global
+                import config
+                config.OPENROUTER_API_KEY = new_key
+
+                messagebox.showinfo(
+                    "Sucesso",
+                    "Chave configurada com sucesso!\n\nA nova chave será usada nas próximas consultas.",
+                    parent=self
+                )
+
+                # Log da mudança
+                logger.info("Chave API reconfigurada pelo usuário")
+            else:
+                logger.info("Configuração de chave cancelada pelo usuário")
+        except Exception as e:
+            logger.error(f"Erro ao configurar chave: {e}")
+            messagebox.showerror("Erro", f"Erro ao configurar chave:\n{e}", parent=self)
+
+    def _check_api_key_on_startup(self):
+        """Verifica se tem chave API válida na inicialização"""
+        if not KEY_MANAGER_AVAILABLE:
+            return True
+
+        # Verifica se a chave atual é válida
+        current_key = OPENROUTER_API_KEY
+        if not current_key or current_key == "SUA_CHAVE_AQUI":
+            # Pede chave ao usuário
+            try:
+                new_key = get_api_key(parent=self, force_new=False)
+                if new_key:
+                    # Atualiza configuração global
+                    import config
+                    config.OPENROUTER_API_KEY = new_key
+                    globals()['OPENROUTER_API_KEY'] = new_key
+                    logger.info("Chave API configurada na inicialização")
+                    return True
+                else:
+                    logger.warning("Usuário cancelou configuração de chave")
+                    messagebox.showwarning(
+                        "Aviso",
+                        "O sistema funcionará parcialmente sem a chave OpenRouter.\n\nVocê pode configurar a chave a qualquer momento no botão '⚙️ Configurar Chave'.",
+                        parent=self
+                    )
+                    return False
+            except Exception as e:
+                logger.error(f"Erro na verificação de chave: {e}")
+                return False
+
+        return True
 
     def _on_closing(self):
         """Handler para fechamento da janela - envia feedback automático se necessário"""

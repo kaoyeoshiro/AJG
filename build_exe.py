@@ -50,6 +50,7 @@ a = Analysis(
         'shutil',
         'subprocess',
         'pathlib',
+        'key_manager',
     ],
     hookspath=[],
     hooksconfig={},
