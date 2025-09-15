@@ -1,14 +1,13 @@
-# config.py
+# config_template.py
 # -*- coding: utf-8 -*-
 """
-Configurações embutidas para o executável
-Substitui a dependência do arquivo .env
+Template de configurações para o executável
+COPIE este arquivo para config.py e configure as variáveis
 """
 
 # ==================================================
 # CONFIGURAÇÕES DO TJ-MS
 # ==================================================
-# IMPORTANTE: Substitua pelos valores reais antes de compilar
 TJ_WSDL_URL = "https://esaj.tjms.jus.br/mniws/servico-intercomunicacao-2.2.2/intercomunicacao?wsdl"
 TJ_WS_USER = "PGEMS"
 TJ_WS_PASS = "SAJ03PGEMS"
@@ -16,9 +15,9 @@ TJ_WS_PASS = "SAJ03PGEMS"
 # ==================================================
 # CONFIGURAÇÕES DO OPENROUTER
 # ==================================================
-# IMPORTANTE: Configure via variáveis de ambiente ou GitHub Secrets
+# IMPORTANTE: Configure via variáveis de ambiente
 import os
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "SUA_CHAVE_API_AQUI")
 OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "google/gemini-2.5-flash"
 

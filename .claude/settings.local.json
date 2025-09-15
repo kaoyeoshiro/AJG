@@ -4,7 +4,8 @@
       "Bash(python test_google_forms_complete.py:*)",
       "Bash(python:*)",
       "WebFetch(domain:github.com)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

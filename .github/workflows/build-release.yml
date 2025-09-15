@@ -36,6 +36,8 @@ jobs:
         python -c "import config; print('✅ Config OK')"
 
     - name: Build executable
+      env:
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       run: |
         python build_exe.py
 
@@ -46,7 +48,7 @@ jobs:
         echo "VERSION=$version" >> $env:GITHUB_ENV
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: RelatorioTJMS-${{ env.VERSION }}
         path: |
