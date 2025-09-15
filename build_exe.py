@@ -13,11 +13,11 @@ def install_pyinstaller():
     """Instala PyInstaller se não estiver disponível"""
     try:
         import PyInstaller
-        print("✅ PyInstaller já está instalado")
+        print("OK - PyInstaller ja esta instalado")
     except ImportError:
         print("📦 Instalando PyInstaller...")
         subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"], check=True)
-        print("✅ PyInstaller instalado com sucesso")
+        print("OK - PyInstaller instalado com sucesso")
 
 def create_spec_file():
     """Cria arquivo .spec personalizado para PyInstaller"""
@@ -95,11 +95,11 @@ exe = EXE(
     with open('RelatorioTJMS.spec', 'w', encoding='utf-8') as f:
         f.write(spec_content)
 
-    print("✅ Arquivo RelatorioTJMS.spec criado")
+    print("OK - Arquivo RelatorioTJMS.spec criado")
 
 def build_executable():
     """Compila o executável usando PyInstaller"""
-    print("🔨 Iniciando compilação do executável...")
+    print("Iniciando compilacao do executavel...")
 
     cmd = [
         "pyinstaller",
@@ -110,28 +110,28 @@ def build_executable():
 
     try:
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        print("✅ Compilação concluída com sucesso!")
-        print(f"📁 Executável criado em: dist/RelatorioTJMS.exe")
+        print("OK - Compilacao concluida com sucesso!")
+        print(f"Executavel criado em: dist/RelatorioTJMS.exe")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ Erro na compilação:")
+        print(f"ERRO na compilacao:")
         print(f"STDOUT: {e.stdout}")
         print(f"STDERR: {e.stderr}")
         return False
 
 def main():
-    print("🚀 Script de Build - Relatório TJ-MS")
+    print("Script de Build - Relatorio TJ-MS")
     print("=" * 50)
 
     # Verifica se estamos no diretório correto
     if not Path("main_exe.py").exists():
-        print("❌ Erro: main_exe.py não encontrado no diretório atual")
+        print("ERRO: main_exe.py nao encontrado no diretorio atual")
         print("Execute este script no diretório do projeto")
         return False
 
     # Verifica se config.py foi configurado
     if not Path("config.py").exists():
-        print("❌ Erro: config.py não encontrado")
+        print("ERRO: config.py nao encontrado")
         return False
 
     # Lê config.py para verificar configuração
@@ -140,15 +140,15 @@ def main():
 
     # Verifica se há placeholders críticos (mas permite SUA_CHAVE_AQUI para build automático)
     if "SEU_TJ_WSDL_URL_AQUI" in config_content:
-        print("⚠️  ATENÇÃO: Configure as variáveis TJ em config.py antes de compilar!")
+        print("ATENCAO: Configure as variaveis TJ em config.py antes de compilar!")
         print("   Substitua os valores 'SEU_TJ_*_AQUI' pelas configurações reais")
         return False
 
     # Para GitHub Actions ou desenvolvimento, permite placeholder da API key
     if "SUA_CHAVE_AQUI" in config_content:
-        print("ℹ️  Nota: OPENROUTER_API_KEY usando placeholder - configurar antes do uso")
+        print("Nota: OPENROUTER_API_KEY usando placeholder - configurar antes do uso")
 
-    print("✅ Configurações verificadas")
+    print("OK - Configuracoes verificadas")
 
     # Instala PyInstaller
     install_pyinstaller()
@@ -161,12 +161,12 @@ def main():
 
     if success:
         print()
-        print("🎉 Build concluído com sucesso!")
-        print("📁 Arquivos gerados:")
+        print("Build concluido com sucesso!")
+        print("Arquivos gerados:")
         print("   - dist/RelatorioTJMS.exe (executável principal)")
         print("   - build/ (arquivos temporários - pode deletar)")
         print()
-        print("🧪 Para testar:")
+        print("Para testar:")
         print("   1. Copie o executável para outro computador")
         print("   2. Execute: dist/RelatorioTJMS.exe")
         print("   3. Teste todas as funcionalidades")
