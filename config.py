@@ -48,21 +48,33 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 # Se não encontrou via ambiente, tenta config_local.py
 if not OPENROUTER_API_KEY:
     try:
-        from config_local import OPENROUTER_API_KEY as LOCAL_KEY
+        # pylint: disable=import-outside-toplevel
+        from config_local import OPENROUTER_API_KEY as LOCAL_KEY  # type: ignore
         OPENROUTER_API_KEY = LOCAL_KEY
     except ImportError:
+        # Arquivo config_local.py é opcional - usado para configurações locais
         pass
 
 # Se ainda não tem chave, tenta carregar do key_manager
 if not OPENROUTER_API_KEY:
     try:
-        from key_manager import KeyManager
+        from scripts.key_manager import KeyManager
         km = KeyManager()
         saved_key = km.load_key()
         if saved_key:
             OPENROUTER_API_KEY = saved_key
     except ImportError:
-        pass
+        # Fallback para importação antiga
+        try:
+            # pylint: disable=import-outside-toplevel
+            from key_manager import KeyManager  # type: ignore
+            km = KeyManager()
+            saved_key = km.load_key()
+            if saved_key:
+                OPENROUTER_API_KEY = saved_key
+        except ImportError:
+            # key_manager pode não existir em algumas configurações
+            pass
 
 # Para executável compilado: substitua "SUA_CHAVE_AQUI" pela chave real antes de compilar
 if not OPENROUTER_API_KEY or OPENROUTER_API_KEY in ["SUA_CHAVE_AQUI", "GITHUB_BUILD_PLACEHOLDER"]:

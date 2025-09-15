@@ -9,7 +9,7 @@ on:
       create_release:
         description: 'Create release after build'
         required: false
-        default: 'true'
+        default: true
         type: boolean
 
 permissions:
@@ -38,22 +38,28 @@ jobs:
       run: |
         python -c "import config; print('Config loaded successfully')"
 
+    - name: Create version file
+      id: version
+      run: |
+        $version = if ($env:GITHUB_REF -match "refs/tags/(.*)") { $matches[1] } else { "v1.0.$env:GITHUB_RUN_NUMBER" }
+        $version | Out-File -FilePath "VERSION" -Encoding utf8 -NoNewline
+        echo "VERSION=$version" >> $env:GITHUB_ENV
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+
     - name: Build executable
       env:
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY || 'GITHUB_BUILD_PLACEHOLDER' }}
       run: |
-        python build_exe.py
+        python scripts/build.py
 
-    - name: Create version file
+    - name: Copy version to dist
       run: |
-        $version = if ($env:GITHUB_REF -match "refs/tags/(.*)") { $matches[1] } else { "v1.0.$env:GITHUB_RUN_NUMBER" }
-        $version | Out-File -FilePath "dist/VERSION" -Encoding utf8
-        echo "VERSION=$version" >> $env:GITHUB_ENV
+        Copy-Item "VERSION" "dist/VERSION"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: RelatorioTJMS-${{ env.VERSION }}
+        name: RelatorioTJMS-${{ steps.version.outputs.version }}
         path: |
           dist/RelatorioTJMS.exe
           dist/VERSION
@@ -61,8 +67,8 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.VERSION }}
-        name: RelatorioTJMS ${{ env.VERSION }}
+        tag_name: ${{ steps.version.outputs.version }}
+        name: RelatorioTJMS ${{ steps.version.outputs.version }}
         body: |
           🚀 **Nova versão do Sistema de Relatórios TJ-MS**
 

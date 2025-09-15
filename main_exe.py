@@ -43,21 +43,31 @@ from config import (
 # Importa módulo de auto-atualização
 # =========================
 try:
-    from updater import check_and_update
+    from scripts.updater import check_and_update
     UPDATER_AVAILABLE = True
 except ImportError:
-    UPDATER_AVAILABLE = False
-    print("Modulo updater nao encontrado - funcionalidade de auto-update desabilitada")
+    try:
+        # Fallback para importação antiga (compatibilidade)
+        from updater import check_and_update
+        UPDATER_AVAILABLE = True
+    except ImportError:
+        UPDATER_AVAILABLE = False
+        print("Modulo updater nao encontrado - funcionalidade de auto-update desabilitada")
 
 # =========================
 # Importa gerenciador de chaves
 # =========================
 try:
-    from key_manager import get_api_key, KeyManager
+    from scripts.key_manager import get_api_key, KeyManager
     KEY_MANAGER_AVAILABLE = True
 except ImportError:
-    KEY_MANAGER_AVAILABLE = False
-    print("Modulo key_manager nao encontrado - usando configuracao estatica")
+    try:
+        # Fallback para importação antiga (compatibilidade)
+        from key_manager import get_api_key, KeyManager
+        KEY_MANAGER_AVAILABLE = True
+    except ImportError:
+        KEY_MANAGER_AVAILABLE = False
+        print("Modulo key_manager nao encontrado - usando configuracao estatica")
 
 # =========================
 # Logging (terminal)

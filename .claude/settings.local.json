@@ -9,7 +9,9 @@
       "Bash(del .env)",
       "Bash(cat:*)",
       "Bash(git commit:*)",
-      "Bash(gh:*)"
+      "Bash(gh:*)",
+      "Bash(grep:*)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []
