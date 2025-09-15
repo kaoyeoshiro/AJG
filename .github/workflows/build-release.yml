@@ -12,6 +12,10 @@ on:
         default: 'true'
         type: boolean
 
+permissions:
+  contents: write
+  releases: write
+
 jobs:
   build:
     runs-on: windows-latest
