@@ -42,11 +42,24 @@ echo OPENROUTER_API_KEY=sk-or-v1-sua-chave-aqui > .env
 OPENROUTER_API_KEY = "sk-or-v1-sua-chave-aqui"
 ```
 
-## 🛠️ Para Usar o Executável
+## 🛠️ Para Compilar o Executável com Chave
 
-O executável funcionará automaticamente se:
-1. A variável `OPENROUTER_API_KEY` estiver definida no sistema
-2. Ou você editar manualmente o `config.py` antes de compilar
+### Opção 1: Build Automático com Chave (RECOMENDADO)
+```bash
+python build_with_key.py
+```
+Este script:
+- ✅ Detecta sua chave automaticamente
+- ✅ Compila o executável com chave integrada
+- ✅ Restaura config original após build
+
+### Opção 2: Configuração Manual
+1. Edite `config.py` linha 37:
+   ```python
+   OPENROUTER_API_KEY = "sk-or-v1-sua-chave-aqui"
+   ```
+2. Execute: `python build_exe.py`
+3. **IMPORTANTE:** Desfaça a mudança antes de commit!
 
 ## ✅ Verificar Configuração
 

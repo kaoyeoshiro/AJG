@@ -16,9 +16,26 @@ TJ_WS_PASS = "SAJ03PGEMS"
 # ==================================================
 # CONFIGURAÇÕES DO OPENROUTER
 # ==================================================
-# IMPORTANTE: Configure via variáveis de ambiente ou GitHub Secrets
 import os
+
+# Tenta carregar de diferentes fontes (ordem de prioridade):
+# 1. Variável de ambiente
+# 2. Arquivo config_local.py (ignorado pelo git)
+# 3. Definição direta (para executável final)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+
+# Se não encontrou via ambiente, tenta config_local.py
+if not OPENROUTER_API_KEY:
+    try:
+        from config_local import OPENROUTER_API_KEY as LOCAL_KEY
+        OPENROUTER_API_KEY = LOCAL_KEY
+    except ImportError:
+        pass
+
+# Para executável compilado: substitua "SUA_CHAVE_AQUI" pela chave real antes de compilar
+if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "SUA_CHAVE_AQUI":
+    OPENROUTER_API_KEY = "SUA_CHAVE_AQUI"  # SUBSTITUA AQUI PARA O EXECUTÁVEL
+
 OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "google/gemini-2.5-flash"
 
