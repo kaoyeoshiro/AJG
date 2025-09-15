@@ -134,14 +134,19 @@ def main():
         print("❌ Erro: config.py não encontrado")
         return False
 
-    # Lê config.py para verificar se foi preenchido
+    # Lê config.py para verificar configuração
     with open("config.py", "r", encoding="utf-8") as f:
         config_content = f.read()
 
+    # Verifica se há placeholders críticos (mas permite SUA_CHAVE_AQUI para build automático)
     if "SEU_TJ_WSDL_URL_AQUI" in config_content:
-        print("⚠️  ATENÇÃO: Configure as variáveis em config.py antes de compilar!")
-        print("   Substitua os valores 'SEU_*_AQUI' pelas configurações reais")
+        print("⚠️  ATENÇÃO: Configure as variáveis TJ em config.py antes de compilar!")
+        print("   Substitua os valores 'SEU_TJ_*_AQUI' pelas configurações reais")
         return False
+
+    # Para GitHub Actions ou desenvolvimento, permite placeholder da API key
+    if "SUA_CHAVE_AQUI" in config_content:
+        print("ℹ️  Nota: OPENROUTER_API_KEY usando placeholder - configurar antes do uso")
 
     print("✅ Configurações verificadas")
 
