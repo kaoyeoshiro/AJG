@@ -315,26 +315,24 @@ DADOS EVIDENCIAIS (JSON):
 
 <tarefas>
 
-1. **Identificação das Partes**  
+1. **Identificação das Partes e Gratuidade da Justiça**  
    - Apresente as partes separadas por polo processual, utilizando "polo ativo" e "polo passivo".  
-   - OBRIGATÓRIO: Para cada parte, coloque o nome entre **asteriscos duplos** seguido de dois pontos.
-   - Indique, em linguagem natural, se cada parte consta no sistema do TJ-MS como beneficiária da justiça gratuita.
-   - Formato obrigatório: **Nome da Parte**: Consta no sistema como beneficiária da justiça gratuita.
-   - Exemplo EXATO: **Maria da Silva**: Consta no sistema do TJ-MS como beneficiária da justiça gratuita.
-   - Exemplo EXATO: **João Santos**: Não consta no sistema do TJ-MS como beneficiário da justiça gratuita.
-
-2. **Confirmação da Gratuidade da Justiça**  
-   - Esclareça, para cada parte, se o sistema do TJ-MS indica a gratuidade da justiça.  
-   - Verifique se há decisão nos autos que conceda a gratuidade e transcreva o trecho relevante entre aspas.
-   - Quando houver mais de uma parte autora e a decisão ou despacho do juiz simplesmente deferir a justiça gratuita, significa que todos tiveram o benefício concedido.     
-   - Diferencie expressamente:  
-     (a) quando o sistema aponta gratuidade mas não há decisão confirmatória;  
+   - Para cada parte, coloque o nome entre **asteriscos duplos** seguido de dois pontos.  
+   - Informe, em linguagem natural, se o sistema do TJ-MS aponta a parte como beneficiária da justiça gratuita.  
+   - Verifique se há decisão nos autos sobre a gratuidade da justiça e transcreva o trecho relevante entre aspas.  
+   - Diferencie expressamente os cenários:  
+     (a) quando o sistema indica gratuidade mas não há decisão confirmatória;  
      (b) quando existe decisão judicial concedendo a gratuidade;  
-     (c) quando não se identificam elementos.
-   - Para cada parte, use o formato: **Nome da Parte**: [informação sobre gratuidade do sistema] + [informação sobre decisão judicial].  
-   - Se identificar decisão deferindo gratuidade, mas não identificar a parte beneficiária, indique isso no relatório.
+     (c) quando não há qualquer indicação de gratuidade.  
+   - Quando houver mais de uma parte autora e a decisão/deferimento mencionar apenas "concedo a gratuidade" sem especificar, considere que todos do polo ativo foram beneficiados.  
+   - Se houver decisão deferindo gratuidade, mas sem indicar quem é a parte beneficiária, registre isso no relatório.  
+   - **Formato obrigatório para cada parte:**  
+     **Nome da Parte**: [informação do sistema do TJ-MS] + [informação sobre decisão judicial].  
+   - **Exemplo EXATO:**  
+     - **Maria da Silva**: Consta no sistema do TJ-MS como beneficiária da justiça gratuita. Decisão judicial confirmatória: "Defiro a gratuidade de justiça à parte autora."  
+     - **João Santos**: Não consta no sistema do TJ-MS como beneficiário da justiça gratuita. Não há decisão judicial sobre o tema. 
 
-3. **Análise das Decisões proferidas no processo**  
+2. **Análise das Decisões proferidas no processo**  
    - Informe apenas as decisões e despachos em que houve designação de perícia. Se não houver, informe que não há decisão ou despacho com designação de perícia.
    - Indique o valor arbitrado, quando existente (ex: R$ 500,00).  
    - Esclareça quem deve arcar com o pagamento (autor, réu, Estado ou outra forma).  
@@ -349,7 +347,7 @@ DADOS EVIDENCIAIS (JSON):
      - Ao concluir, escreva obrigatoriamente:  
        "Análise realizada com base na Resolução CNJ n. 232/2016, conforme redação dada pelas Resoluções n. 326/2020, n. 545/2024 e n. 599/2024."
 
-4. **Apenso em cumprimento de sentença**  
+3. **Apenso em cumprimento de sentença**  
    - Se o processo não for de cumprimento de sentença, mas houve indicação de apensamento, indique isso no relatório.
    - Caso o processo seja de cumprimento de sentença e haja indícios de apensamento, finalize o relatório com a advertência:  
      "Aviso: Processo de cumprimento possivelmente apensado. Recomenda-se consulta ao processo originário para confirmar a concessão da justiça gratuita."
@@ -398,41 +396,59 @@ Use a seguinte TABELA DE HONORÁRIOS como referência (valores máximos):
 </instruções_de_formatação>
 
 <formato_de_saida>
-A resposta deve ser redigida em **Markdown** no formato de relatório jurídico, estruturado em seções numeradas:
+A resposta deve ser redigida em **Markdown**, no formato de relatório jurídico estruturado em seções numeradas:
 
-# Relatório -  Processo XXXXXXX-XX.XXXX.X.XX.XXXX
+# Relatório - Processo XXXXXXX-XX.XXXX.X.XX.XXXX
 
-## 1. Partes e Polos Processuais
+## 1. Partes, Polos Processuais e Gratuidade da Justiça
+- Apresente as partes separadas por polo processual ("polo ativo" e "polo passivo").  
+- Para cada parte, coloque o nome entre **asteriscos duplos** seguido de dois pontos.  
+- Informe, em linguagem natural:  
+  (a) se consta no sistema do TJ-MS como beneficiária da justiça gratuita;  
+  (b) se há decisão judicial confirmatória, transcrevendo o trecho relevante entre aspas;  
+  (c) se não há qualquer indicação.  
+- Quando houver decisão deferindo a gratuidade para o polo ativo de forma genérica, considerar todos beneficiados.  
+- Caso a decisão não identifique quem é a parte beneficiária, registrar essa observação.  
+
+**Formato obrigatório:**  
+**Nome da Parte**: [informação do sistema do TJ-MS] + [informação sobre decisão judicial].  
+
+**Exemplo de saída:**
+
 **Polo ativo:**  
-- **Nome da Parte A**: consta no sistema como beneficiária da justiça gratuita.  
-- **Nome da Parte B**: não consta como beneficiária da justiça gratuita.  
+- **Maria da Silva**: Consta no sistema do TJ-MS como beneficiária da justiça gratuita. Decisão confirmatória: *“Defiro a gratuidade de justiça à parte autora.”* (Despacho, 01/01/2023).  
+- **João Santos**: Consta no sistema como beneficiário da justiça gratuita. Não há decisão confirmatória nos autos.  
 
 **Polo passivo:**  
-- **Nome da Parte C**: consta no sistema como beneficiária da justiça gratuita. 
+- **Banco X S.A.**: Não consta no sistema nem há decisão sobre o tema.  
 
-## 2. Benefício da Gratuidade da Justiça
-- **Parte A:** O sistema do TJ-MS indica a concessão da gratuidade da justiça. Há decisão confirmando: *“Defiro a justiça gratuita”* (Despacho, data).  
-- **Parte B:** O sistema indica a concessão, mas não há decisão específica nos autos confirmando.  
-- **Parte C:** Não há indicação no sistema nem decisão nos autos. 
+## 2. Análise das Decisões Proferidas no Processo
+- Listar cada decisão relevante em subtópicos (por data).  
+- Informar:  
+  - Designação de perícia (Sim/Não).  
+  - Valor arbitrado (em reais).  
+  - Responsável pelo pagamento (Estado/autor/réu).  
+  - Momento do pagamento (imediato/ao final do processo).  
+  - Trecho da decisão entre aspas.
 
-## 3. Análise das Decisões Proferidas no Processo:
+**Exemplo de saída:**
 
-### Decisão de XX/XX/XXXX
-- **Designação de perícia:** Sim/Não.  
-- **Valor arbitrado:** R$ XXXX,XX.  
-- **Responsável pelo pagamento:** Estado/autor/réu.  
-- **Momento do pagamento:** imediato / ao final do processo.  
-- **Trecho da decisão:** *“...”*  
+### Decisão de 01/01/2023
+- **Designação de perícia:** Sim.  
+- **Valor arbitrado:** R$ 1.500,00.  
+- **Responsável pelo pagamento:** Autor.  
+- **Momento do pagamento:** Ao final do processo.  
+- **Trecho da decisão:** *“Defiro a produção de prova pericial, a ser custeada ao final.”*  
 
-### Decisão de XX/XX/XXXX
-- **Designação de perícia:** Sim/Não.  
-- **Valor arbitrado:** R$ XXXX,XX.  
-- **Responsável pelo pagamento:** Estado/autor/réu.  
-- **Momento do pagamento:** imediato / ao final do processo.  
-- **Trecho da decisão:** *“...”* 
+### Decisão de 10/02/2023
+- **Designação de perícia:** Não.  
+- **Valor arbitrado:** —  
+- **Responsável pelo pagamento:** —  
+- **Momento do pagamento:** —  
+- **Trecho da decisão:** *“Indefiro o pedido de prova pericial.”*  
 
-## 4. Processos Apensados:
-- Caso aplicável, incluir o aviso sobre possível apensamento.
+## 3. Processos Apensados
+- Caso aplicável, incluir o aviso sobre possível apensamento. 
 
 </formato_de_saida>
 
@@ -497,7 +513,7 @@ def call_openrouter(messages: list, model: str = DEFAULT_MODEL, temperature=0.2,
 # =========================
 # Pipeline alto nível
 # =========================
-def full_flow(numero_raw: str, model: str, diagnostic_mode=False) -> Tuple[Dict[str, Any], str]:
+def full_flow(numero_raw: str, diagnostic_mode=False) -> Tuple[Dict[str, Any], str]:
     ok_env, msg_env = validate_env()
     if not ok_env:
         raise RuntimeError(f"Falha no .env: {msg_env}")
@@ -527,7 +543,7 @@ def full_flow(numero_raw: str, model: str, diagnostic_mode=False) -> Tuple[Dict[
     else:
         messages = build_messages_for_llm(cnj_fmt, dados)
 
-    rel = call_openrouter(messages, model=model)
+    rel = call_openrouter(messages, model=DEFAULT_MODEL)
     # reforço do aviso se for cumprimento + apenso
     if dados.get("cumprimento") and dados.get("possivel_apenso"):
         rel += "\n\nAviso: Processo de cumprimento possivelmente apensado. Talvez seja necessário consultar o processo originário para confirmar a AJG."
@@ -1706,7 +1722,6 @@ class App(tk.Tk):
         self.geometry("1080x760")
 
         self.var_num   = tk.StringVar()
-        self.var_model = tk.StringVar(value=DEFAULT_MODEL)
         self.var_debug = tk.BooleanVar(value=False)
 
         self._dados_brutos_cache: Dict[str, Any] = {}
@@ -1742,15 +1757,9 @@ class App(tk.Tk):
         ttk.Label(top, text="(ex: 1234567-89.2020.1.23.4567)", 
                  foreground="gray").grid(row=1, column=1, sticky="w", padx=6, pady=0)
 
-        ttk.Label(top, text="Modelo (OpenRouter):").grid(row=0, column=2, sticky="e", padx=6, pady=4)
-        ttk.Combobox(top, textvariable=self.var_model, values=[
-            "google/gemini-2.5-flash",
-            "openai/gpt-oss-120b",
-            "anthropic/claude-sonnet-4",
-        ], width=28).grid(row=0, column=3, sticky="w", padx=6, pady=4)
 
         ttk.Checkbutton(top, text="Modo detalhado (DEBUG)", variable=self.var_debug,
-                        command=self._toggle_debug).grid(row=0, column=4, sticky="w", padx=10)
+                        command=self._toggle_debug).grid(row=0, column=2, sticky="w", padx=10)
 
         btns = ttk.Frame(self); btns.pack(fill=tk.X, padx=10, pady=6)
         ttk.Button(btns, text="Gerar Relatório", command=self._on_run).pack(side=tk.LEFT, padx=4)
@@ -1935,7 +1944,7 @@ class App(tk.Tk):
                 tipo="ERRO", 
                 descricao=error_description,
                 processo=self._processo_atual,
-                modelo=self.var_model.get()
+                modelo=DEFAULT_MODEL
             )
             
             if success:
@@ -1965,7 +1974,7 @@ class App(tk.Tk):
                 tipo="SUCESSO_AUTO",
                 descricao="Relatório gerado sem problemas reportados - novo relatório iniciado",
                 processo=self._processo_atual,
-                modelo=self.var_model.get()
+                modelo=DEFAULT_MODEL
             )
             logger.info(f"Feedback positivo automático enviado para processo {self._processo_atual}")
             
@@ -2037,7 +2046,7 @@ class App(tk.Tk):
                 tipo="SUCESSO_AUTO",
                 descricao="Relatório gerado sem problemas reportados - sistema fechado",
                 processo=self._processo_atual,
-                modelo=self.var_model.get()
+                modelo=DEFAULT_MODEL
             )
             logger.info(f"Feedback positivo automático enviado ao fechar sistema para processo {self._processo_atual}")
         
@@ -2105,7 +2114,7 @@ class App(tk.Tk):
 
         def go():
             try:
-                dados, rel = full_flow(numero, self.var_model.get().strip() or DEFAULT_MODEL, diagnostic_mode=False)
+                dados, rel = full_flow(numero, diagnostic_mode=False)
                 self._dados_brutos_cache = dados
                 self._write_report(rel)
                 self._set_status("Concluído.")
