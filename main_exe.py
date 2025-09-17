@@ -404,48 +404,66 @@ Use a seguinte TABELA DE HONORÁRIOS como referência (valores máximos):
 </tabela_resolucao_232>
 
 <instruções_de_formatação>
-- Estruture o relatório em seções numeradas.
-- Utilize linguagem formal, como se fosse redigido por um assistente jurídico.
-- Prefira construções como "consta no sistema", "há decisão judicial que defere", "não identificado nos autos".
-- Evite linguagem técnica de programação.
+- Estruture o relatório em seções numeradas.  
+- Utilize linguagem formal, como se fosse redigido por um assistente jurídico.  
+- Prefira construções como "consta no sistema", "há decisão judicial que defere", "não identificado nos autos".  
+- Evite linguagem técnica de programação.  
 </instruções_de_formatação>
 
 <formato_de_saida>
-A resposta deve ser redigida em **Markdown** no formato de relatório jurídico, estruturado em seções numeradas:
+A resposta deve ser redigida em **Markdown**, no formato de relatório jurídico estruturado em seções numeradas:
 
-# Relatório -  Processo XXXXXXX-XX.XXXX.X.XX.XXXX
+# Relatório - Processo XXXXXXX-XX.XXXX.X.XX.XXXX
 
-## 1. Partes e Polos Processuais
-**Polo ativo:**
-- **Nome da Parte A**: consta no sistema como beneficiária da justiça gratuita.
-- **Nome da Parte B**: não consta como beneficiária da justiça gratuita.
+## 1. Partes, Polos Processuais e Gratuidade da Justiça
+- Apresente as partes separadas por polo processual ("polo ativo" e "polo passivo").  
+- Para cada parte, coloque o nome entre **asteriscos duplos** seguido de dois pontos.  
+- Informe, em linguagem natural:  
+  (a) se consta no sistema do TJ-MS como beneficiária da justiça gratuita;  
+  (b) se há decisão judicial confirmatória, transcrevendo o trecho relevante entre aspas;  
+  (c) se não há qualquer indicação.  
+- Quando houver decisão deferindo a gratuidade para o polo ativo de forma genérica, considerar todos beneficiados.  
+- Caso a decisão não identifique quem é a parte beneficiária, registrar essa observação.  
 
-**Polo passivo:**
-- **Nome da Parte C**: consta no sistema como beneficiária da justiça gratuita.
+**Formato obrigatório:**  
+**Nome da Parte**: [informação do sistema do TJ-MS] + [informação sobre decisão judicial].  
 
-## 2. Benefício da Gratuidade da Justiça
-- **Parte A:** O sistema do TJ-MS indica a concessão da gratuidade da justiça. Há decisão confirmando: *"Defiro a justiça gratuita"* (Despacho, data).
-- **Parte B:** O sistema indica a concessão, mas não há decisão específica nos autos confirmando.
-- **Parte C:** Não há indicação no sistema nem decisão nos autos.
+**Exemplo de saída:**
 
-## 3. Análise das Decisões Proferidas no Processo:
+**Polo ativo:**  
+- **Maria da Silva**: Consta no sistema do TJ-MS como beneficiária da justiça gratuita. Decisão confirmatória: *“Defiro a gratuidade de justiça à parte autora.”* (Despacho, 01/01/2023).  
+- **João Santos**: Consta no sistema como beneficiário da justiça gratuita. Não há decisão confirmatória nos autos.  
 
-### Decisão de XX/XX/XXXX
-- **Designação de perícia:** Sim/Não.
-- **Valor arbitrado:** R$ XXXX,XX.
-- **Responsável pelo pagamento:** Estado/autor/réu.
-- **Momento do pagamento:** imediato / ao final do processo.
-- **Trecho da decisão:** *"..."*
+**Polo passivo:**  
+- **Banco X S.A.**: Não consta no sistema nem há decisão sobre o tema.  
 
-### Decisão de XX/XX/XXXX
-- **Designação de perícia:** Sim/Não.
-- **Valor arbitrado:** R$ XXXX,XX.
-- **Responsável pelo pagamento:** Estado/autor/réu.
-- **Momento do pagamento:** imediato / ao final do processo.
-- **Trecho da decisão:** *"..."*
+## 2. Análise das Decisões Proferidas no Processo
+- Listar cada decisão relevante em subtópicos (por data).  
+- Informar:  
+  - Designação de perícia (Sim/Não).  
+  - Valor arbitrado (em reais).  
+  - Responsável pelo pagamento (Estado/autor/réu).  
+  - Momento do pagamento (imediato/ao final do processo).  
+  - Trecho da decisão entre aspas.
 
-## 4. Processos Apensados:
-- Caso aplicável, incluir o aviso sobre possível apensamento.
+**Exemplo de saída:**
+
+### Decisão de 01/01/2023
+- **Designação de perícia:** Sim.  
+- **Valor arbitrado:** R$ 1.500,00.  
+- **Responsável pelo pagamento:** Autor.  
+- **Momento do pagamento:** Ao final do processo.  
+- **Trecho da decisão:** *“Defiro a produção de prova pericial, a ser custeada ao final.”*  
+
+### Decisão de 10/02/2023
+- **Designação de perícia:** Não.  
+- **Valor arbitrado:** —  
+- **Responsável pelo pagamento:** —  
+- **Momento do pagamento:** —  
+- **Trecho da decisão:** *“Indefiro o pedido de prova pericial.”*  
+
+## 3. Processos Apensados
+- Caso aplicável, incluir o aviso sobre possível apensamento. 
 
 </formato_de_saida>
 
