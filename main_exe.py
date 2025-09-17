@@ -1737,7 +1737,6 @@ class App(tk.Tk):
         self.geometry("1080x760")
 
         self.var_num   = tk.StringVar()
-        self.var_model = tk.StringVar(value=DEFAULT_MODEL)
         self.var_debug = tk.BooleanVar(value=False)
 
         self._dados_brutos_cache: Dict[str, Any] = {}
@@ -1776,15 +1775,9 @@ class App(tk.Tk):
         ttk.Label(top, text="(ex: 1234567-89.2020.1.23.4567)",
                  foreground="gray").grid(row=1, column=1, sticky="w", padx=6, pady=0)
 
-        ttk.Label(top, text="Modelo (OpenRouter):").grid(row=0, column=2, sticky="e", padx=6, pady=4)
-        ttk.Combobox(top, textvariable=self.var_model, values=[
-            "google/gemini-2.5-flash",
-            "openai/gpt-oss-120b",
-            "anthropic/claude-sonnet-4",
-        ], width=28).grid(row=0, column=3, sticky="w", padx=6, pady=4)
 
         ttk.Checkbutton(top, text="Modo detalhado (DEBUG)", variable=self.var_debug,
-                        command=self._toggle_debug).grid(row=0, column=4, sticky="w", padx=10)
+                        command=self._toggle_debug).grid(row=0, column=2, sticky="w", padx=10)
 
         btns = ttk.Frame(self); btns.pack(fill=tk.X, padx=10, pady=6)
         ttk.Button(btns, text="Gerar Relatório", command=self._on_run).pack(side=tk.LEFT, padx=4)
@@ -1983,7 +1976,7 @@ class App(tk.Tk):
                 tipo="ERRO",
                 descricao=error_description,
                 processo=self._processo_atual,
-                modelo=self.var_model.get()
+                modelo=DEFAULT_MODEL
             )
 
             if success:
@@ -2013,7 +2006,7 @@ class App(tk.Tk):
                 tipo="SUCESSO_AUTO",
                 descricao="Relatório gerado sem problemas reportados - novo relatório iniciado",
                 processo=self._processo_atual,
-                modelo=self.var_model.get()
+                modelo=DEFAULT_MODEL
             )
             logger.info(f"Feedback positivo automático enviado para processo {self._processo_atual}")
 
@@ -2161,7 +2154,7 @@ class App(tk.Tk):
                 tipo="SUCESSO_AUTO",
                 descricao="Relatório gerado sem problemas reportados - sistema fechado",
                 processo=self._processo_atual,
-                modelo=self.var_model.get()
+                modelo=DEFAULT_MODEL
             )
             logger.info(f"Feedback positivo automático enviado ao fechar sistema para processo {self._processo_atual}")
 
@@ -2229,7 +2222,7 @@ class App(tk.Tk):
 
         def go():
             try:
-                dados, rel = full_flow(numero, self.var_model.get().strip() or DEFAULT_MODEL, diagnostic_mode=False)
+                dados, rel = full_flow(numero, DEFAULT_MODEL, diagnostic_mode=False)
                 self._dados_brutos_cache = dados
                 self._write_report(rel)
                 self._set_status("Concluído.")
