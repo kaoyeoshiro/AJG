@@ -2334,11 +2334,11 @@ if __name__ == "__main__":
     # Verificação silenciosa de atualizações na inicialização (opcional)
     if UPDATER_AVAILABLE:
         try:
-            # Verifica atualizações em background sem interromper o usuário
+            # Verifica e aplica atualizações automaticamente em background
             def check_on_startup():
                 import time
                 time.sleep(2)  # Aguarda interface carregar
-                check_and_update(silent=True)
+                check_and_update(silent=True, auto_update=True)
 
             threading.Thread(target=check_on_startup, daemon=True).start()
         except:

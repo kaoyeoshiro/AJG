@@ -144,7 +144,7 @@ del "%~f0"
             print(f"Erro ao aplicar atualização: {e}")
             return False
 
-def check_and_update(parent_window=None, silent=False):
+def check_and_update(parent_window=None, silent=False, auto_update=False):
     """Função principal para verificar e aplicar atualizações"""
     updater = AutoUpdater()
 
@@ -156,11 +156,17 @@ def check_and_update(parent_window=None, silent=False):
             if parent_window:
                 messagebox.showinfo("Atualizações", "Você já está usando a versão mais recente!", parent=parent_window)
             else:
-                print("✅ Sistema atualizado - versão mais recente em uso")
+                print("Sistema atualizado - versão mais recente em uso")
         return False
 
-    # Pergunta se deseja atualizar
-    message = f"""Nova versão disponível!
+    # Pergunta se deseja atualizar (ou atualiza automaticamente se auto_update=True)
+    if auto_update:
+        # Atualização automática sem perguntar
+        result = True
+        if not silent:
+            print(f"Atualizando automaticamente de {updater.current_version} para {update_info['version']}...")
+    else:
+        message = f"""Nova versão disponível!
 
 Versão atual: {updater.current_version}
 Nova versão: {update_info['version']}
@@ -169,11 +175,11 @@ Deseja atualizar agora?
 
 Nota: O programa será fechado e reaberto automaticamente."""
 
-    if parent_window:
-        result = messagebox.askyesno("Atualização Disponível", message, parent=parent_window)
-    else:
-        print(message)
-        result = input("Atualizar? (s/n): ").lower() == 's'
+        if parent_window:
+            result = messagebox.askyesno("Atualização Disponível", message, parent=parent_window)
+        else:
+            print(message)
+            result = input("Atualizar? (s/n): ").lower() == 's'
 
     if not result:
         return False
@@ -208,7 +214,7 @@ Nota: O programa será fechado e reaberto automaticamente."""
         if parent_window:
             messagebox.showerror("Erro", "Falha ao baixar a atualização!", parent=parent_window)
         else:
-            print("❌ Erro ao baixar atualização")
+            print("Erro ao baixar atualização")
         return False
 
     # Aplica a atualização
@@ -219,7 +225,7 @@ Nota: O programa será fechado e reaberto automaticamente."""
             messagebox.showinfo("Sucesso", "Atualização baixada! O programa será reiniciado.", parent=parent_window)
             parent_window.quit()
         else:
-            print("🔄 Aplicando atualização e reiniciando...")
+            print("Aplicando atualização e reiniciando...")
 
         # Encerra o programa (será reiniciado pelo batch)
         sys.exit(0)
@@ -227,7 +233,7 @@ Nota: O programa será fechado e reaberto automaticamente."""
         if parent_window:
             messagebox.showerror("Erro", "Falha ao aplicar a atualização!", parent=parent_window)
         else:
-            print("❌ Erro ao aplicar atualização")
+            print("Erro ao aplicar atualização")
         return False
 
     return True
