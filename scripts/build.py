@@ -104,26 +104,82 @@ a = Analysis(
     binaries=[],
     datas=[],
     hiddenimports=[
+        # GUI modules
         'tkinter',
         'tkinter.ttk',
         'tkinter.scrolledtext',
         'tkinter.messagebox',
         'tkinter.filedialog',
+
+        # Requests comprehensive
         'requests',
+        'requests.adapters',
+        'requests.api',
+        'requests.auth',
+        'requests.certs',
+        'requests.compat',
+        'requests.cookies',
+        'requests.exceptions',
+        'requests.hooks',
+        'requests.models',
+        'requests.packages',
+        'requests.packages.urllib3',
+        'requests.packages.urllib3.exceptions',
+        'requests.packages.urllib3.util',
+        'requests.sessions',
+        'requests.status_codes',
+        'requests.structures',
+        'requests.utils',
+
+        # urllib3 complete
+        'urllib3',
+        'urllib3._collections',
+        'urllib3.connection',
+        'urllib3.connectionpool',
+        'urllib3.exceptions',
+        'urllib3.poolmanager',
+        'urllib3.response',
+        'urllib3.util',
+        'urllib3.util.retry',
+        'urllib3.util.ssl_',
+        'urllib3.util.timeout',
+
+        # SSL and certificates
+        'certifi',
+        'ssl',
+        '_ssl',
+
+        # Encoding
+        'charset_normalizer',
+        'charset_normalizer.api',
+        'charset_normalizer.models',
+        'idna',
+        'idna.core',
+
+        # XML processing
         'xml.etree.ElementTree',
         'lxml',
+        'lxml.etree',
+
+        # Standard library
         'json',
         'base64',
         'threading',
         'logging',
         'datetime',
         'typing',
-        'scripts.updater',
-        'scripts.key_manager',
         'tempfile',
         'shutil',
         'subprocess',
         'pathlib',
+        'os',
+        'sys',
+        're',
+        'html',
+
+        # Custom modules
+        'scripts.updater',
+        'scripts.key_manager',
     ],
     hookspath=[],
     hooksconfig={},

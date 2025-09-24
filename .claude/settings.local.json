@@ -14,7 +14,8 @@
       "Bash(awk:*)",
       "Bash(findstr:*)",
       "Bash(pyinstaller:*)",
-      "Bash(tasklist)"
+      "Bash(tasklist)",
+      "Bash(git tag:*)"
     ],
     "deny": [],
     "ask": []

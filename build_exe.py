@@ -39,17 +39,50 @@ def build_exe():
         '--hidden-import=tkinter.messagebox',
         '--hidden-import=tkinter.filedialog',
 
-        # Requests e dependências
+        # Requests e dependências - lista completa
         '--hidden-import=requests',
         '--hidden-import=requests.adapters',
+        '--hidden-import=requests.api',
         '--hidden-import=requests.auth',
+        '--hidden-import=requests.certs',
+        '--hidden-import=requests.compat',
         '--hidden-import=requests.cookies',
+        '--hidden-import=requests.exceptions',
+        '--hidden-import=requests.hooks',
         '--hidden-import=requests.models',
+        '--hidden-import=requests.packages',
+        '--hidden-import=requests.packages.urllib3',
+        '--hidden-import=requests.packages.urllib3.exceptions',
+        '--hidden-import=requests.packages.urllib3.util',
         '--hidden-import=requests.sessions',
+        '--hidden-import=requests.status_codes',
+        '--hidden-import=requests.structures',
+        '--hidden-import=requests.utils',
+
+        # urllib3 completo
         '--hidden-import=urllib3',
+        '--hidden-import=urllib3._collections',
+        '--hidden-import=urllib3.connection',
+        '--hidden-import=urllib3.connectionpool',
+        '--hidden-import=urllib3.exceptions',
+        '--hidden-import=urllib3.poolmanager',
+        '--hidden-import=urllib3.response',
+        '--hidden-import=urllib3.util',
+        '--hidden-import=urllib3.util.retry',
+        '--hidden-import=urllib3.util.ssl_',
+        '--hidden-import=urllib3.util.timeout',
+
+        # SSL e certificados
         '--hidden-import=certifi',
+        '--hidden-import=ssl',
+        '--hidden-import=_ssl',
+
+        # Encoding
         '--hidden-import=charset_normalizer',
+        '--hidden-import=charset_normalizer.api',
+        '--hidden-import=charset_normalizer.models',
         '--hidden-import=idna',
+        '--hidden-import=idna.core',
 
         # XML processing
         '--hidden-import=xml.etree.ElementTree',
