@@ -11,7 +11,10 @@
       "Bash(git commit:*)",
       "Bash(gh:*)",
       "Bash(grep:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(findstr:*)",
+      "Bash(pyinstaller:*)",
+      "Bash(tasklist)"
     ],
     "deny": [],
     "ask": []

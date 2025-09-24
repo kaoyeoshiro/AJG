@@ -1,7 +1,7 @@
 # scripts/build.py
 # -*- coding: utf-8 -*-
 """
-Script unificado para compilar o executável RelatorioTJMS
+Script unificado para compilar o executável AJG
 Combina funcionalidades de build_exe.py e build_with_key.py
 """
 
@@ -150,7 +150,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='RelatorioTJMS',
+    name='AJG',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -166,10 +166,10 @@ exe = EXE(
 )
 '''
 
-    with open('RelatorioTJMS.spec', 'w', encoding='utf-8') as f:
+    with open('AJG.spec', 'w', encoding='utf-8') as f:
         f.write(spec_content)
 
-    print("OK - Arquivo RelatorioTJMS.spec criado")
+    print("OK - Arquivo AJG.spec criado")
 
 def build_executable():
     """Compila o executável usando PyInstaller"""
@@ -179,13 +179,13 @@ def build_executable():
         "pyinstaller",
         "--clean",
         "--noconfirm",
-        "RelatorioTJMS.spec"
+        "AJG.spec"
     ]
 
     try:
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         print("OK - Compilacao concluida com sucesso!")
-        print(f"Executavel criado em: dist/RelatorioTJMS.exe")
+        print(f"Executavel criado em: dist/AJG.exe")
         return True
     except subprocess.CalledProcessError as e:
         print(f"ERRO na compilacao:")
@@ -195,7 +195,7 @@ def build_executable():
 
 def main():
     """Função principal do script de build"""
-    print("Script de Build Unificado - Relatorio TJ-MS")
+    print("Script de Build Unificado - AJG (Assistencia Judiciaria Gratuita)")
     print("=" * 50)
 
     # Verifica se estamos no diretório correto
@@ -249,12 +249,12 @@ def main():
             print()
             print("Build concluido com sucesso!")
             print("Arquivos gerados:")
-            print("   - dist/RelatorioTJMS.exe (executavel principal)")
+            print("   - dist/AJG.exe (executavel principal)")
             print("   - build/ (arquivos temporarios - pode deletar)")
             print()
             print("Para testar:")
             print("   1. Copie o executavel para outro computador")
-            print("   2. Execute: dist/RelatorioTJMS.exe")
+            print("   2. Execute: dist/AJG.exe")
             print("   3. Teste todas as funcionalidades")
 
         return success

@@ -59,21 +59,21 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: RelatorioTJMS-${{ steps.version.outputs.version }}
+        name: AJG-${{ steps.version.outputs.version }}
         path: |
-          dist/RelatorioTJMS.exe
+          dist/AJG.exe
           dist/VERSION
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.version.outputs.version }}
-        name: RelatorioTJMS ${{ steps.version.outputs.version }}
+        name: AJG ${{ steps.version.outputs.version }}
         body: |
-          🚀 **Nova versão do Sistema de Relatórios TJ-MS**
+          🚀 **Nova versão do Sistema AJG - Assistência Judiciária Gratuita**
 
           ## 📥 Download
-          - Baixe o arquivo `RelatorioTJMS.exe`
+          - Baixe o arquivo `AJG.exe`
           - Execute direto no Windows (não precisa instalar)
 
           ## ⚙️ Configuração Necessária
@@ -90,7 +90,7 @@ jobs:
           ---
           🤖 Build automatizado via GitHub Actions
         files: |
-          dist/RelatorioTJMS.exe
+          dist/AJG.exe
         draft: false
         prerelease: false
       env:
