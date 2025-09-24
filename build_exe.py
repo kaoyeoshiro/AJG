@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script para construir executável com PyInstaller
-Resolve problemas de dependências do requests e outros módulos
+Script para construir executável com PyInstaller.
+Inclui coleta explícita da stack HTTP (requests, urllib3, certifi, etc.)
+para evitar erros de ModuleNotFoundError em ambientes limpos.
 """
 
 import subprocess
@@ -10,109 +11,78 @@ import sys
 import os
 import shutil
 
+# Pacotes cujo conteúdo completo deve ser coletado
+HTTP_STACK_MODULES = [
+    "requests",
+    "urllib3",
+    "certifi",
+    "charset_normalizer",
+    "idna",
+]
+
+# Imports que o PyInstaller nem sempre detecta sozinho
+HIDDEN_IMPORTS = [
+    # GUI
+    "tkinter",
+    "tkinter.ttk",
+    "tkinter.scrolledtext",
+    "tkinter.messagebox",
+    "tkinter.filedialog",
+
+    # HTTP stack base
+    "requests",
+    "urllib3",
+    "certifi",
+    "charset_normalizer",
+    "idna",
+
+    # XML processing
+    "xml.etree.ElementTree",
+    "lxml",
+    "lxml.etree",
+
+    # Scripts customizados
+    "scripts.updater",
+    "scripts.key_manager",
+]
+
+
 def clean_build_dirs():
-    """Remove diretórios de build anteriores"""
+    """Remove diretórios de builds anteriores para evitar resíduos"""
     dirs_to_clean = ['build', 'dist', '__pycache__']
     for dir_name in dirs_to_clean:
         if os.path.exists(dir_name):
             print(f"Removendo diretório: {dir_name}")
             shutil.rmtree(dir_name)
 
+
 def build_exe():
     """Constrói o executável usando PyInstaller com configurações otimizadas"""
 
     print("Iniciando construção do executável...")
 
-    # Comando PyInstaller otimizado
     cmd = [
         sys.executable, '-m', 'PyInstaller',
-        '--onefile',                    # Arquivo único
-        '--noconsole',                  # Sem janela de console
-        '--name=AJG',                   # Nome do executável
-        '--clean',                      # Limpa cache
-        '--noconfirm',                  # Não pede confirmação
-
-        # Módulos principais
-        '--hidden-import=tkinter',
-        '--hidden-import=tkinter.ttk',
-        '--hidden-import=tkinter.scrolledtext',
-        '--hidden-import=tkinter.messagebox',
-        '--hidden-import=tkinter.filedialog',
-
-        # Requests e dependências - lista completa
-        '--hidden-import=requests',
-        '--hidden-import=requests.adapters',
-        '--hidden-import=requests.api',
-        '--hidden-import=requests.auth',
-        '--hidden-import=requests.certs',
-        '--hidden-import=requests.compat',
-        '--hidden-import=requests.cookies',
-        '--hidden-import=requests.exceptions',
-        '--hidden-import=requests.hooks',
-        '--hidden-import=requests.models',
-        '--hidden-import=requests.packages',
-        '--hidden-import=requests.packages.urllib3',
-        '--hidden-import=requests.packages.urllib3.exceptions',
-        '--hidden-import=requests.packages.urllib3.util',
-        '--hidden-import=requests.sessions',
-        '--hidden-import=requests.status_codes',
-        '--hidden-import=requests.structures',
-        '--hidden-import=requests.utils',
-
-        # urllib3 completo
-        '--hidden-import=urllib3',
-        '--hidden-import=urllib3._collections',
-        '--hidden-import=urllib3.connection',
-        '--hidden-import=urllib3.connectionpool',
-        '--hidden-import=urllib3.exceptions',
-        '--hidden-import=urllib3.poolmanager',
-        '--hidden-import=urllib3.response',
-        '--hidden-import=urllib3.util',
-        '--hidden-import=urllib3.util.retry',
-        '--hidden-import=urllib3.util.ssl_',
-        '--hidden-import=urllib3.util.timeout',
-
-        # SSL e certificados
-        '--hidden-import=certifi',
-        '--hidden-import=ssl',
-        '--hidden-import=_ssl',
-
-        # Encoding
-        '--hidden-import=charset_normalizer',
-        '--hidden-import=charset_normalizer.api',
-        '--hidden-import=charset_normalizer.models',
-        '--hidden-import=idna',
-        '--hidden-import=idna.core',
-
-        # XML processing
-        '--hidden-import=xml.etree.ElementTree',
-        '--hidden-import=lxml',
-        '--hidden-import=lxml.etree',
-
-        # Scripts customizados
-        '--hidden-import=scripts.updater',
-        '--hidden-import=scripts.key_manager',
-
-        # Outros módulos essenciais
-        '--hidden-import=json',
-        '--hidden-import=base64',
-        '--hidden-import=threading',
-        '--hidden-import=logging',
-        '--hidden-import=datetime',
-        '--hidden-import=typing',
-        '--hidden-import=tempfile',
-        '--hidden-import=shutil',
-        '--hidden-import=subprocess',
-        '--hidden-import=pathlib',
-        '--hidden-import=ssl',
-        '--hidden-import=socket',
-
-        # Incluir diretório scripts
-        '--add-data=scripts;scripts',
-
-        # Arquivo principal
-        'main_exe.py'
+        '--onefile',
+        '--noconsole',
+        '--name=AJG',
+        '--clean',
+        '--noconfirm',
     ]
+
+    # Imports explícitos
+    for module in HIDDEN_IMPORTS:
+        cmd.append(f'--hidden-import={module}')
+
+    # Coleta completa da stack HTTP (código + dados, ex: cacert.pem)
+    for module in HTTP_STACK_MODULES:
+        cmd.append(f'--collect-all={module}')
+
+    # Dados adicionais
+    cmd.extend([
+        '--add-data=scripts;scripts',
+        'main_exe.py',
+    ])
 
     try:
         print("Executando comando PyInstaller...")
@@ -131,20 +101,18 @@ def build_exe():
         print("❌ Timeout: Processo demorou mais de 10 minutos")
         return False
 
+
 def main():
     """Função principal"""
     print("=== BUILD EXECUTÁVEL RELATÓRIO TJ-MS ===")
 
-    # Verificar se estamos no diretório correto
     if not os.path.exists('main_exe.py'):
         print("❌ Arquivo main_exe.py não encontrado!")
         print("Execute este script no diretório raiz do projeto.")
         sys.exit(1)
 
-    # Limpar diretórios antigos
     clean_build_dirs()
 
-    # Construir executável
     success = build_exe()
 
     if success:
@@ -153,6 +121,7 @@ def main():
     else:
         print("\n❌ Build falhou. Verifique os erros acima.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

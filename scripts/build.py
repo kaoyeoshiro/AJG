@@ -1,8 +1,9 @@
 # scripts/build.py
 # -*- coding: utf-8 -*-
 """
-Script unificado para compilar o executável AJG
-Combina funcionalidades de build_exe.py e build_with_key.py
+Script unificado para compilar o executável AJG.
+Atualizado para coletar explicitamente a stack HTTP (requests, urllib3, certifi, etc.)
+mitigando erros de ModuleNotFoundError em ambientes limpos.
 """
 
 import os
@@ -14,11 +15,16 @@ from pathlib import Path
 # Adiciona diretório pai ao path para imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Pacotes que precisam ter TODO o conteúdo coletado
+HTTP_SUBMODULE_TARGETS = ("requests", "urllib3", "charset_normalizer", "idna")
+HTTP_DATAS_TARGETS = ("requests", "urllib3", "certifi", "charset_normalizer", "idna")
+
+
 def install_pyinstaller():
     """Instala PyInstaller se não estiver disponível"""
     try:
-        import PyInstaller
-        print("OK - PyInstaller ja esta instalado")
+        import PyInstaller  # pylint: disable=import-outside-toplevel
+        print("OK - PyInstaller já está instalado")
         return True
     except ImportError:
         print("Instalando PyInstaller...")
@@ -26,23 +32,22 @@ def install_pyinstaller():
         print("OK - PyInstaller instalado com sucesso")
         return True
 
+
 def get_api_key():
     """Obtém a chave API de diferentes fontes"""
-    # 1. Importa config (que já carrega .env automaticamente)
-    import config
+    import config  # pylint: disable=import-outside-toplevel
 
     key = config.OPENROUTER_API_KEY
     if key and key != "SUA_CHAVE_AQUI":
         print(f"OK - Chave configurada: {key[:20]}...")
         return key
 
-    # Se não encontrou, pedir ao usuário
-    print("ATENCAO - Chave API nao encontrada!")
-    print("Voce pode:")
+    print("ATENÇÃO - Chave API não encontrada!")
+    print("Você pode:")
     print("1. Criar arquivo .env com: OPENROUTER_API_KEY=sua-chave")
-    print("2. Definir variavel de ambiente: set OPENROUTER_API_KEY=sua-chave")
+    print("2. Definir variável de ambiente: set OPENROUTER_API_KEY=sua-chave")
     print("3. Criar config_local.py com: OPENROUTER_API_KEY = 'sua-chave'")
-    print("4. Inserir aqui diretamente (temporario)")
+    print("4. Inserir aqui diretamente (temporário)")
 
     key = input("\nDigite sua chave OpenRouter (sk-or-v1-...) ou ENTER para continuar sem chave: ").strip()
 
@@ -52,36 +57,34 @@ def get_api_key():
     print("Continuando sem chave API configurada...")
     return None
 
+
 def prepare_config(api_key=None):
     """Prepara o config.py para o build"""
     if not api_key:
         return True
 
-    # Backup do config original
     config_file = Path("config.py")
     backup_file = Path("config_original.py")
 
     if config_file.exists():
         shutil.copy2(config_file, backup_file)
 
-        # Lê o config atual
         with open(config_file, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Substitui a placeholder pela chave real
         updated_content = content.replace(
             'OPENROUTER_API_KEY = "SUA_CHAVE_AQUI"',
             f'OPENROUTER_API_KEY = "{api_key}"'
         )
 
-        # Salva temporariamente
         with open(config_file, "w", encoding="utf-8") as f:
             f.write(updated_content)
 
-        print("OK - Config temporario criado com chave API")
+        print("OK - Config temporário criado com chave API")
         return True
 
     return False
+
 
 def restore_config():
     """Restaura o config original após o build"""
@@ -92,97 +95,93 @@ def restore_config():
         shutil.move(backup_file, config_file)
         print("OK - Config original restaurado")
 
+
 def create_spec_file():
     """Cria arquivo .spec personalizado para PyInstaller"""
-    spec_content = '''# -*- mode: python ; coding: utf-8 -*-
+    spec_content = f'''# -*- mode: python ; coding: utf-8 -*-
+
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
 block_cipher = None
+
+
+def _urllib3_filter(name):
+    return 'contrib.emscripten' not in name
+
+
+hiddenimports = [
+    # GUI modules
+    'tkinter',
+    'tkinter.ttk',
+    'tkinter.scrolledtext',
+    'tkinter.messagebox',
+    'tkinter.filedialog',
+
+    # Base HTTP modules
+    'requests',
+    'urllib3',
+    'certifi',
+    'charset_normalizer',
+    'idna',
+
+    # XML processing
+    'xml.etree.ElementTree',
+    'lxml',
+    'lxml.etree',
+    'lxml.objectify',
+
+    # Standard library
+    'json',
+    'base64',
+    'threading',
+    'logging',
+    'datetime',
+    'typing',
+    'tempfile',
+    'shutil',
+    'subprocess',
+    'pathlib',
+    'os',
+    'sys',
+    're',
+    'html',
+
+    # Custom modules
+    'scripts.updater',
+    'scripts.key_manager',
+]
+
+http_submodule_targets = {HTTP_SUBMODULE_TARGETS!r}
+for module_name in http_submodule_targets:
+    try:
+        if module_name == 'urllib3':
+            hiddenimports += collect_submodules(module_name, filter=_urllib3_filter)
+        else:
+            hiddenimports += collect_submodules(module_name)
+    except ImportError:
+        pass
+
+
+datas = [
+    ('scripts', 'scripts'),
+]
+
+http_data_targets = {HTTP_DATAS_TARGETS!r}
+for module_name in http_data_targets:
+    try:
+        datas += collect_data_files(module_name)
+    except ImportError:
+        pass
+
 
 a = Analysis(
     ['main_exe.py'],
     pathex=[],
     binaries=[],
-    datas=[],
-    hiddenimports=[
-        # GUI modules
-        'tkinter',
-        'tkinter.ttk',
-        'tkinter.scrolledtext',
-        'tkinter.messagebox',
-        'tkinter.filedialog',
-
-        # Requests comprehensive
-        'requests',
-        'requests.adapters',
-        'requests.api',
-        'requests.auth',
-        'requests.certs',
-        'requests.compat',
-        'requests.cookies',
-        'requests.exceptions',
-        'requests.hooks',
-        'requests.models',
-        'requests.packages',
-        'requests.packages.urllib3',
-        'requests.packages.urllib3.exceptions',
-        'requests.packages.urllib3.util',
-        'requests.sessions',
-        'requests.status_codes',
-        'requests.structures',
-        'requests.utils',
-
-        # urllib3 complete
-        'urllib3',
-        'urllib3._collections',
-        'urllib3.connection',
-        'urllib3.connectionpool',
-        'urllib3.exceptions',
-        'urllib3.poolmanager',
-        'urllib3.response',
-        'urllib3.util',
-        'urllib3.util.retry',
-        'urllib3.util.ssl_',
-        'urllib3.util.timeout',
-
-        # SSL and certificates
-        'certifi',
-        'ssl',
-        '_ssl',
-
-        # Encoding
-        'charset_normalizer',
-        'charset_normalizer.api',
-        'charset_normalizer.models',
-        'idna',
-        'idna.core',
-
-        # XML processing
-        'xml.etree.ElementTree',
-        'lxml',
-        'lxml.etree',
-
-        # Standard library
-        'json',
-        'base64',
-        'threading',
-        'logging',
-        'datetime',
-        'typing',
-        'tempfile',
-        'shutil',
-        'subprocess',
-        'pathlib',
-        'os',
-        'sys',
-        're',
-        'html',
-
-        # Custom modules
-        'scripts.updater',
-        'scripts.key_manager',
-    ],
+    datas=datas,
+    hiddenimports=hiddenimports,
     hookspath=[],
-    hooksconfig={},
+    hooksconfig={{}},
     runtime_hooks=[],
     excludes=[
         'matplotlib',
@@ -213,12 +212,12 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # Desabilita janela do console
+    console=False,
     disable_windowed_traceback=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # Adicione caminho do ícone se tiver: icon='icon.ico'
+    icon=None,
 )
 '''
 
@@ -227,9 +226,10 @@ exe = EXE(
 
     print("OK - Arquivo AJG.spec criado")
 
+
 def build_executable():
     """Compila o executável usando PyInstaller"""
-    print("Iniciando compilacao do executavel...")
+    print("Iniciando compilação do executável...")
 
     cmd = [
         "pyinstaller",
@@ -240,88 +240,79 @@ def build_executable():
 
     try:
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        print("OK - Compilacao concluida com sucesso!")
-        print(f"Executavel criado em: dist/AJG.exe")
+        print("OK - Compilação concluída com sucesso!")
+        print("Executável criado em: dist/AJG.exe")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"ERRO na compilacao:")
+        print("ERRO na compilação:")
         print(f"STDOUT: {e.stdout}")
         print(f"STDERR: {e.stderr}")
         return False
 
+
 def main():
     """Função principal do script de build"""
-    print("Script de Build Unificado - AJG (Assistencia Judiciaria Gratuita)")
+    print("Script de Build Unificado - AJG (Assistência Judiciária Gratuita)")
     print("=" * 50)
 
-    # Verifica se estamos no diretório correto
     if not Path("main_exe.py").exists():
-        print("ERRO: main_exe.py nao encontrado no diretorio atual")
-        print("Execute este script no diretorio raiz do projeto")
+        print("ERRO: main_exe.py não encontrado no diretório atual")
+        print("Execute este script no diretório raiz do projeto")
         return False
 
-    # Verifica se config.py existe
     if not Path("config.py").exists():
-        print("ERRO: config.py nao encontrado")
+        print("ERRO: config.py não encontrado")
         return False
 
-    # Argumentos de linha de comando
     use_key = "--with-key" in sys.argv
 
     api_key = None
     if use_key:
-        print("\nConfiguracao de chave API habilitada")
+        print("\nConfiguração de chave API habilitada")
         api_key = get_api_key()
 
     try:
-        # Prepara configuração se necessário
         if api_key:
             prepare_config(api_key)
 
-        # Verifica configuração
         with open("config.py", "r", encoding="utf-8") as f:
             config_content = f.read()
 
         if "SEU_TJ_WSDL_URL_AQUI" in config_content:
-            print("ATENCAO: Configure as variaveis TJ em config.py antes de compilar!")
-            print("Substitua os valores 'SEU_TJ_*_AQUI' pelas configuracoes reais")
+            print("ATENÇÃO: Configure as variáveis TJ em config.py antes de compilar!")
+            print("Substitua os valores 'SEU_TJ_*_AQUI' pelas configurações reais")
             return False
 
         if "SUA_CHAVE_AQUI" in config_content and not api_key:
             print("Nota: OPENROUTER_API_KEY usando placeholder - configurar antes do uso")
 
-        print("OK - Configuracoes verificadas")
+        print("OK - Configurações verificadas")
 
-        # Instala PyInstaller
         install_pyinstaller()
-
-        # Cria arquivo .spec
         create_spec_file()
-
-        # Compila executável
         success = build_executable()
 
         if success:
             print()
-            print("Build concluido com sucesso!")
+            print("Build concluído com sucesso!")
             print("Arquivos gerados:")
-            print("   - dist/AJG.exe (executavel principal)")
-            print("   - build/ (arquivos temporarios - pode deletar)")
+            print("   - dist/AJG.exe (executável principal)")
+            print("   - build/ (arquivos temporários - pode deletar)")
             print()
             print("Para testar:")
-            print("   1. Copie o executavel para outro computador")
+            print("   1. Copie o executável para outro computador")
             print("   2. Execute: dist/AJG.exe")
             print("   3. Teste todas as funcionalidades")
 
         return success
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         print(f"ERRO inesperado: {e}")
         return False
     finally:
-        # Sempre restaura o config original
         if api_key:
             restore_config()
+
 
 if __name__ == "__main__":
     success = main()
