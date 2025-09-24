@@ -86,6 +86,22 @@ def make_session() -> requests.Session:
     retry = Retry(total=4, backoff_factor=0.6, status_forcelist=[429, 500, 502, 503, 504])
     s.mount("http://", HTTPAdapter(max_retries=retry))
     s.mount("https://", HTTPAdapter(max_retries=retry))
+
+    # Configurar certificados SSL para executável PyInstaller
+    if getattr(sys, 'frozen', False):
+        # Executável empacotado - usar cacert.pem incluído
+        import os
+        bundle_path = sys._MEIPASS
+        cacert_path = os.path.join(bundle_path, 'certifi', 'cacert.pem')
+        if os.path.exists(cacert_path):
+            s.verify = cacert_path
+            logger.info(f"Usando certificados SSL de: {cacert_path}")
+        else:
+            # Fallback: usar certifi padrão
+            import certifi
+            s.verify = certifi.where()
+            logger.info(f"Fallback: usando certificados SSL de: {certifi.where()}")
+
     return s
 
 def only_digits(s: str) -> str:
