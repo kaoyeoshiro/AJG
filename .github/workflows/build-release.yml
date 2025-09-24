@@ -32,11 +32,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pyinstaller
+        pip install pyinstaller>=6.0.0
 
-    - name: Verify config
+    - name: Verify config and dependencies
       run: |
         python -c "import config; print('Config loaded successfully')"
+        python -c "import requests; print(f'Requests version: {requests.__version__}')"
+        python -c "import urllib3; print(f'urllib3 version: {urllib3.__version__}')"
+        python -c "import certifi; print(f'certifi version: {certifi.__version__}')"
+        python -c "from PyInstaller.utils.hooks import collect_submodules, collect_data_files; print('PyInstaller hooks available')"
 
     - name: Create version file
       id: version

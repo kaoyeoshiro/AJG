@@ -1,9 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+import sys
 
 block_cipher = None
 
+print("=== DEBUG: Iniciando configuração do PyInstaller ===")
 
 def _urllib3_filter(name):
     return 'contrib.emscripten' not in name
@@ -17,12 +19,38 @@ hiddenimports = [
     'tkinter.messagebox',
     'tkinter.filedialog',
 
-    # Base HTTP modules
+    # Base HTTP modules - CRÍTICO
     'requests',
+    'requests.adapters',
+    'requests.api',
+    'requests.auth',
+    'requests.certs',
+    'requests.compat',
+    'requests.cookies',
+    'requests.exceptions',
+    'requests.hooks',
+    'requests.models',
+    'requests.sessions',
+    'requests.status_codes',
+    'requests.structures',
+    'requests.utils',
     'urllib3',
+    'urllib3._collections',
+    'urllib3.connection',
+    'urllib3.connectionpool',
+    'urllib3.exceptions',
+    'urllib3.poolmanager',
+    'urllib3.response',
+    'urllib3.util',
+    'urllib3.util.retry',
+    'urllib3.util.ssl_',
+    'urllib3.util.timeout',
     'certifi',
     'charset_normalizer',
+    'charset_normalizer.api',
+    'charset_normalizer.models',
     'idna',
+    'idna.core',
 
     # XML processing
     'xml.etree.ElementTree',
@@ -45,33 +73,49 @@ hiddenimports = [
     'sys',
     're',
     'html',
+    'ssl',
+    '_ssl',
+    'socket',
 
     # Custom modules
     'scripts.updater',
     'scripts.key_manager',
 ]
 
+print(f"DEBUG: hiddenimports iniciais: {len(hiddenimports)} módulos")
+
+# Coleta automática de submódulos
 http_submodule_targets = ('requests', 'urllib3', 'charset_normalizer', 'idna')
 for module_name in http_submodule_targets:
     try:
         if module_name == 'urllib3':
-            hiddenimports += collect_submodules(module_name, filter=_urllib3_filter)
+            collected = collect_submodules(module_name, filter=_urllib3_filter)
         else:
-            hiddenimports += collect_submodules(module_name)
-    except ImportError:
-        pass
+            collected = collect_submodules(module_name)
+        hiddenimports += collected
+        print(f"DEBUG: Coletados {len(collected)} submódulos de {module_name}")
+    except ImportError as e:
+        print(f"DEBUG: Erro coletando submódulos de {module_name}: {e}")
 
 
 datas = [
     ('scripts', 'scripts'),
 ]
 
+# Coleta automática de arquivos de dados
 http_data_targets = ('requests', 'urllib3', 'certifi', 'charset_normalizer', 'idna')
 for module_name in http_data_targets:
     try:
-        datas += collect_data_files(module_name)
-    except ImportError:
-        pass
+        collected = collect_data_files(module_name)
+        datas += collected
+        print(f"DEBUG: Coletados {len(collected)} arquivos de dados de {module_name}")
+    except ImportError as e:
+        print(f"DEBUG: Erro coletando dados de {module_name}: {e}")
+
+print(f"DEBUG: Total hiddenimports: {len(hiddenimports)}")
+print(f"DEBUG: Total datas: {len(datas)}")
+print("=== DEBUG: Configuração concluída ===")
+sys.stdout.flush()
 
 
 a = Analysis(

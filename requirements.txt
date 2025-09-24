@@ -26,8 +26,7 @@ reportlab>=4.0.0
 Pillow>=10.0.0
 
 # DOCX generation (Word documents) - RECOMENDADO
-py
-thon-docx>=1.1.0
+python-docx>=1.1.0
 
 # DOCX to PDF conversion (alternativa ao LibreOffice) - RECOMENDADO  
 docx2pdf>=0.1.8
