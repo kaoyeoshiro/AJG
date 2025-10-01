@@ -122,78 +122,56 @@ jobs:
           $is_signed = $false
         }
 
-        # Create security report
+        # Create security report with simple concatenation
         $version = "${{ steps.version.outputs.version }}"
         $buildDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
         $commit = "${{ github.sha }}"
-        $signatureStatus = if ($is_signed) { "✓ **Assinatura Digital:** Válida" } else { "⚠ **Assinatura Digital:** Não assinado" }
 
-        $securityReport = @"
-# Relatório de Segurança - AJG.exe
+        if ($is_signed) {
+          $signatureStatus = "* **Assinatura Digital:** Válida"
+        } else {
+          $signatureStatus = "* **Assinatura Digital:** Não assinado"
+        }
 
-**Versão:** $version
-**Data de Build:** $buildDate
-**Commit:** $commit
-**Tamanho:** $size_mb MB
+        # Create security report content
+        $content = "# Relatório de Segurança - AJG.exe`n`n"
+        $content += "**Versão:** $version`n"
+        $content += "**Data de Build:** $buildDate`n"
+        $content += "**Commit:** $commit`n"
+        $content += "**Tamanho:** $size_mb MB`n`n"
+        $content += "## Verificações de Segurança`n`n"
+        $content += "* **Build Automatizado:** Compilado no GitHub Actions`n"
+        $content += "* **Fonte Aberta:** Código disponível para auditoria`n"
+        $content += "* **Checksums:** Incluídos para verificação`n"
+        $content += "$signatureStatus`n`n"
+        $content += "## Checksums para Verificação`n`n"
+        $content += "``````n"
+        $content += "SHA256: $($hash_sha256.Hash)`n"
+        $content += "SHA1: $($hash_sha1.Hash)`n"
+        $content += "MD5: $($hash_md5.Hash)`n"
+        $content += "``````n`n"
+        $content += "## Como Verificar`n`n"
+        $content += "### PowerShell:`n"
+        $content += "``````powershell`n"
+        $content += "Get-FileHash AJG.exe -Algorithm SHA256`n"
+        $content += "``````n`n"
+        $content += "### Command Prompt:`n"
+        $content += "``````cmd`n"
+        $content += "certutil -hashfile AJG.exe SHA256`n"
+        $content += "``````n`n"
+        $content += "## Se Windows Defender Bloquear`n`n"
+        $content += "1. Clique em 'Mais informações'`n"
+        $content += "2. Clique em 'Executar assim mesmo'`n"
+        $content += "3. Ou adicione exceção permanente`n`n"
+        $content += "## Por que é Seguro`n`n"
+        $content += "- Código-fonte aberto no GitHub`n"
+        $content += "- Build reproduzível no GitHub Actions`n"
+        $content += "- Checksums verificáveis`n`n"
+        $content += "## Suporte`n`n"
+        $content += "- Issues: https://github.com/${{ github.repository }}/issues`n"
+        $content += "- Código: https://github.com/${{ github.repository }}`n"
 
-## Verificações de Segurança
-
-✓ **Build Automatizado:** Compilado no GitHub Actions (ambiente auditável)
-✓ **Fonte Aberta:** Código disponível para auditoria
-✓ **Checksums:** Incluídos para verificação de integridade
-$signatureStatus
-
-## Checksums para Verificação
-
-```
-SHA256: $($hash_sha256.Hash)
-SHA1:   $($hash_sha1.Hash)
-MD5:    $($hash_md5.Hash)
-```
-
-## Como Verificar a Integridade
-
-### Windows PowerShell:
-```powershell
-# Verificar SHA256
-Get-FileHash AJG.exe -Algorithm SHA256
-
-# Verificar assinatura (se assinado)
-Get-AuthenticodeSignature AJG.exe
-```
-
-### Windows Command Prompt:
-```cmd
-certutil -hashfile AJG.exe SHA256
-```
-
-## Se o Windows Defender Bloquear
-
-1. **Clique em "Mais informações"** na tela de bloqueio
-2. **Clique em "Executar assim mesmo"**
-3. **Ou adicione exceção permanente:**
-   - Abra Windows Security
-   - Vá em "Proteção contra vírus e ameaças"
-   - Clique em "Gerenciar configurações"
-   - Em "Exclusões", clique "Adicionar ou remover exclusões"
-   - Adicione o arquivo AJG.exe
-
-## Por que é Seguro
-
-- **Código-fonte aberto** disponível no GitHub
-- **Build reproduzível** no GitHub Actions
-- **Histórico público** de todas as mudanças
-- **Checksums verificáveis** para integridade
-- **Comunidade ativa** de desenvolvedores
-
-## Suporte
-
-- **Issues:** https://github.com/${{ github.repository }}/issues
-- **Código:** https://github.com/${{ github.repository }}
-- **Releases:** https://github.com/${{ github.repository }}/releases
-"@
-
-        $securityReport | Out-File -FilePath "dist/SECURITY.md" -Encoding UTF8
+        $content | Out-File -FilePath "dist/SECURITY.md" -Encoding UTF8
 
         # Create simple checksum file
         "$($hash_sha256.Hash) *AJG.exe" | Out-File -FilePath "dist/SHA256SUMS" -Encoding ASCII
