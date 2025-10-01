@@ -12,6 +12,7 @@ Requisitos: requests (Tkinter vem no Python oficial Win/Mac; no Linux instalar v
 """
 
 import os
+import sys
 import re
 import json
 import html
@@ -48,7 +49,7 @@ try:
 except ImportError:
     try:
         # Fallback para importação antiga (compatibilidade)
-        from updater import check_and_update
+        from updater import check_and_update  # type: ignore[import-not-found]
         UPDATER_AVAILABLE = True
     except ImportError:
         UPDATER_AVAILABLE = False
@@ -63,7 +64,7 @@ try:
 except ImportError:
     try:
         # Fallback para importação antiga (compatibilidade)
-        from key_manager import get_api_key, KeyManager
+        from key_manager import get_api_key, KeyManager  # type: ignore[import-not-found]
         KEY_MANAGER_AVAILABLE = True
     except ImportError:
         KEY_MANAGER_AVAILABLE = False
