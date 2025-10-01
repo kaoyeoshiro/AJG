@@ -123,46 +123,51 @@ jobs:
         }
 
         # Create security report
-        @"
-# 🔒 Relatório de Segurança - AJG.exe
+        $version = "${{ steps.version.outputs.version }}"
+        $buildDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+        $commit = "${{ github.sha }}"
+        $signatureStatus = if ($is_signed) { "✓ **Assinatura Digital:** Válida" } else { "⚠ **Assinatura Digital:** Não assinado" }
 
-**Versão:** ${{ steps.version.outputs.version }}
-**Data de Build:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
-**Commit:** ${{ github.sha }}
+        $securityReport = @"
+# Relatório de Segurança - AJG.exe
+
+**Versão:** $version
+**Data de Build:** $buildDate
+**Commit:** $commit
 **Tamanho:** $size_mb MB
 
-## 🛡️ Verificações de Segurança
+## Verificações de Segurança
 
-✅ **Build Automatizado:** Compilado no GitHub Actions (ambiente auditável)
-✅ **Fonte Aberta:** Código disponível para auditoria
-✅ **Checksums:** Incluídos para verificação de integridade
-$(if ($is_signed) { '✅ **Assinatura Digital:** Válida' } else { '⚠️ **Assinatura Digital:** Não assinado' })
+✓ **Build Automatizado:** Compilado no GitHub Actions (ambiente auditável)
+✓ **Fonte Aberta:** Código disponível para auditoria
+✓ **Checksums:** Incluídos para verificação de integridade
+$signatureStatus
 
-## 📋 Checksums para Verificação
+## Checksums para Verificação
 
-``````
+```
 SHA256: $($hash_sha256.Hash)
 SHA1:   $($hash_sha1.Hash)
 MD5:    $($hash_md5.Hash)
-``````
+```
 
-## 🔍 Como Verificar a Integridade
+## Como Verificar a Integridade
 
 ### Windows PowerShell:
-``````powershell
+```powershell
 # Verificar SHA256
 Get-FileHash AJG.exe -Algorithm SHA256
 
 # Verificar assinatura (se assinado)
 Get-AuthenticodeSignature AJG.exe
-``````
+```
 
 ### Windows Command Prompt:
-``````cmd
+```cmd
 certutil -hashfile AJG.exe SHA256
-``````
+```
 
-## 🚨 Se o Windows Defender Bloquear
+## Se o Windows Defender Bloquear
 
 1. **Clique em "Mais informações"** na tela de bloqueio
 2. **Clique em "Executar assim mesmo"**
@@ -173,7 +178,7 @@ certutil -hashfile AJG.exe SHA256
    - Em "Exclusões", clique "Adicionar ou remover exclusões"
    - Adicione o arquivo AJG.exe
 
-## ✅ Por que é Seguro
+## Por que é Seguro
 
 - **Código-fonte aberto** disponível no GitHub
 - **Build reproduzível** no GitHub Actions
@@ -181,19 +186,19 @@ certutil -hashfile AJG.exe SHA256
 - **Checksums verificáveis** para integridade
 - **Comunidade ativa** de desenvolvedores
 
-## 📞 Suporte
+## Suporte
 
 - **Issues:** https://github.com/${{ github.repository }}/issues
 - **Código:** https://github.com/${{ github.repository }}
 - **Releases:** https://github.com/${{ github.repository }}/releases
-"@ | Out-File -FilePath "dist/SECURITY.md" -Encoding UTF8
+"@
+
+        $securityReport | Out-File -FilePath "dist/SECURITY.md" -Encoding UTF8
 
         # Create simple checksum file
-        @"
-$($hash_sha256.Hash) *AJG.exe
-"@ | Out-File -FilePath "dist/SHA256SUMS" -Encoding ASCII
+        "$($hash_sha256.Hash) *AJG.exe" | Out-File -FilePath "dist/SHA256SUMS" -Encoding ASCII
 
-        Write-Output "✅ Checksums e relatório de segurança gerados"
+        Write-Output "Checksums e relatório de segurança gerados"
 
     - name: Copy version to dist
       run: |
