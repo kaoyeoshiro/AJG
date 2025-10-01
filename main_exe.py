@@ -289,6 +289,7 @@ def parse_xml_processo(xml_text: str) -> Dict[str, Any]:
 
         # MUDANÇA: Agora coleta TODOS os movimentos que tenham descrição
         # Prioriza códigos 3 (decisão) e 11009 (despacho), mas inclui todos
+        # A filtragem para perícia será feita no prompt LLM
         if not descrs:
             descrs = _all_texts(mov, "descricao")
 
@@ -374,12 +375,16 @@ DADOS EVIDENCIAIS (JSON):
      * "**Maria Santos**: Consta no sistema como beneficiária. Decisão deferindo gratuidade, mas ⚠️ REVISÃO NECESSÁRIA: o texto não especifica qual dos autores foi beneficiado."
      * "**Pedro Oliveira**: Não consta no sistema. Há decisão deferindo gratuidade 'aos autores', mas há 3 autores no processo. ⚠️ REVISÃO NECESSÁRIA: confirmar se esta parte específica foi beneficiada."
 
-3. **Análise das Decisões proferidas no processo**
-   - Informe apenas as decisões e despachos em que houve designação de perícia. Se não houver, informe que não há decisão ou despacho com designação de perícia.
-   - Indique o valor arbitrado, quando existente (ex: R$ 500,00).
-   - Esclareça quem deve arcar com o pagamento (autor, réu, Estado ou outra forma).
-   - Esclareça o momento do pagamento: se a decisão determina pagamento imediato ou ao final do processo.
-   - Realize a análise de conformidade com a TABELA de honorários, transcrita abaixo:
+3. **Análise das Decisões sobre Perícia**
+   - Analise EXCLUSIVAMENTE as decisões e despachos que tratam de perícia, incluindo designação, nomeação de peritos, arbitramento de honorários periciais, ou determinações relacionadas à prova pericial.
+   - Se não houver nenhuma decisão ou despacho tratando de perícia, informe claramente: "Não há decisões ou despachos tratando de perícia nos autos analisados."
+   - Para cada decisão pericial encontrada, indique:
+     * Se houve designação de perícia (Sim/Não)
+     * O valor arbitrado para honorários periciais, quando existente (ex: R$ 500,00)
+     * Quem deve arcar com o pagamento dos honorários (autor, réu, Estado ou outra forma)
+     * O momento do pagamento: se imediato ou ao final do processo
+     * Transcreva o trecho relevante da decisão entre aspas
+   - Realize a análise de conformidade com a TABELA de honorários periciais transcrita abaixo:
      - Considere que o juiz pode ultrapassar o limite em até 5 vezes, desde que fundamentado.
      - Classifique o valor como:
        (a) dentro da tabela;
@@ -469,14 +474,15 @@ A resposta deve ser redigida em **Markdown**, no formato de relatório jurídico
 **Polo passivo:**
 - **Banco X S.A.**: Não consta no sistema nem há decisão sobre o tema.  
 
-## 2. Análise das Decisões Proferidas no Processo
-- Listar cada decisão relevante em subtópicos (por data).  
-- Informar:  
-  - Designação de perícia (Sim/Não).  
-  - Valor arbitrado (em reais).  
-  - Responsável pelo pagamento (Estado/autor/réu).  
-  - Momento do pagamento (imediato/ao final do processo).  
-  - Trecho da decisão entre aspas.
+## 2. Análise das Decisões sobre Perícia
+- Listar APENAS decisões e despachos relacionados à perícia em subtópicos (por data).
+- Se não houver decisões sobre perícia, informar: "Não há decisões ou despachos tratando de perícia nos autos analisados."
+- Para cada decisão pericial, informar:
+  - Designação de perícia (Sim/Não).
+  - Valor arbitrado para honorários periciais (em reais).
+  - Responsável pelo pagamento dos honorários (Estado/autor/réu).
+  - Momento do pagamento (imediato/ao final do processo).
+  - Trecho relevante da decisão entre aspas.
 
 **Exemplo de saída:**
 
@@ -488,11 +494,11 @@ A resposta deve ser redigida em **Markdown**, no formato de relatório jurídico
 - **Trecho da decisão:** *“Defiro a produção de prova pericial, a ser custeada ao final.”*  
 
 ### Decisão de 10/02/2023
-- **Designação de perícia:** Não.  
-- **Valor arbitrado:** —  
-- **Responsável pelo pagamento:** —  
-- **Momento do pagamento:** —  
-- **Trecho da decisão:** *“Indefiro o pedido de prova pericial.”*  
+- **Designação de perícia:** Não (indeferimento).
+- **Valor arbitrado:** —
+- **Responsável pelo pagamento:** —
+- **Momento do pagamento:** —
+- **Trecho da decisão:** *"Indefiro o pedido de prova pericial por considerar desnecessária."*  
 
 ## 3. Processos Apensados
 - Caso aplicável, incluir o aviso sobre possível apensamento. 

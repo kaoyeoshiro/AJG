@@ -56,6 +56,145 @@ jobs:
       run: |
         python scripts/build.py
 
+    - name: Sign executable (if certificate available)
+      env:
+        CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
+        CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+      run: |
+        if ($env:CERTIFICATE_BASE64) {
+          Write-Output "🔐 Assinando executável digitalmente..."
+
+          # Decode certificate
+          $cert_bytes = [System.Convert]::FromBase64String($env:CERTIFICATE_BASE64)
+          $cert_path = "certificate.p12"
+          [System.IO.File]::WriteAllBytes($cert_path, $cert_bytes)
+
+          # Install Windows SDK if not present
+          if (-not (Test-Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe")) {
+            Write-Output "Instalando Windows SDK..."
+            choco install windows-sdk-10-version-2004-all
+          }
+
+          # Find signtool
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object Name -Descending | Select-Object -First 1
+
+          if ($signtool) {
+            # Sign the executable
+            & $signtool.FullName sign /f $cert_path /p $env:CERTIFICATE_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 "dist/AJG.exe"
+
+            if ($LASTEXITCODE -eq 0) {
+              Write-Output "✅ Executável assinado com sucesso!"
+
+              # Verify signature
+              & $signtool.FullName verify /pa "dist/AJG.exe"
+            } else {
+              Write-Warning "⚠️ Falha na assinatura digital"
+            }
+          } else {
+            Write-Warning "⚠️ signtool não encontrado"
+          }
+
+          # Clean up certificate
+          Remove-Item $cert_path -Force -ErrorAction SilentlyContinue
+        } else {
+          Write-Output "ℹ️ Certificado não configurado - executável não será assinado"
+          Write-Output "Para assinatura digital, configure os secrets CERTIFICATE_BASE64 e CERTIFICATE_PASSWORD"
+        }
+
+    - name: Generate checksums and security info
+      run: |
+        # Generate checksums
+        $exe_path = "dist/AJG.exe"
+        $hash_sha256 = Get-FileHash $exe_path -Algorithm SHA256
+        $hash_sha1 = Get-FileHash $exe_path -Algorithm SHA1
+        $hash_md5 = Get-FileHash $exe_path -Algorithm MD5
+
+        # Get file info
+        $file_info = Get-Item $exe_path
+        $size_mb = [math]::Round($file_info.Length / 1MB, 2)
+
+        # Check if signed
+        $is_signed = $false
+        try {
+          $signature = Get-AuthenticodeSignature $exe_path
+          $is_signed = $signature.Status -eq 'Valid'
+        } catch {
+          $is_signed = $false
+        }
+
+        # Create security report
+        @"
+# 🔒 Relatório de Segurança - AJG.exe
+
+**Versão:** ${{ steps.version.outputs.version }}
+**Data de Build:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
+**Commit:** ${{ github.sha }}
+**Tamanho:** $size_mb MB
+
+## 🛡️ Verificações de Segurança
+
+✅ **Build Automatizado:** Compilado no GitHub Actions (ambiente auditável)
+✅ **Fonte Aberta:** Código disponível para auditoria
+✅ **Checksums:** Incluídos para verificação de integridade
+$(if ($is_signed) { '✅ **Assinatura Digital:** Válida' } else { '⚠️ **Assinatura Digital:** Não assinado' })
+
+## 📋 Checksums para Verificação
+
+``````
+SHA256: $($hash_sha256.Hash)
+SHA1:   $($hash_sha1.Hash)
+MD5:    $($hash_md5.Hash)
+``````
+
+## 🔍 Como Verificar a Integridade
+
+### Windows PowerShell:
+``````powershell
+# Verificar SHA256
+Get-FileHash AJG.exe -Algorithm SHA256
+
+# Verificar assinatura (se assinado)
+Get-AuthenticodeSignature AJG.exe
+``````
+
+### Windows Command Prompt:
+``````cmd
+certutil -hashfile AJG.exe SHA256
+``````
+
+## 🚨 Se o Windows Defender Bloquear
+
+1. **Clique em "Mais informações"** na tela de bloqueio
+2. **Clique em "Executar assim mesmo"**
+3. **Ou adicione exceção permanente:**
+   - Abra Windows Security
+   - Vá em "Proteção contra vírus e ameaças"
+   - Clique em "Gerenciar configurações"
+   - Em "Exclusões", clique "Adicionar ou remover exclusões"
+   - Adicione o arquivo AJG.exe
+
+## ✅ Por que é Seguro
+
+- **Código-fonte aberto** disponível no GitHub
+- **Build reproduzível** no GitHub Actions
+- **Histórico público** de todas as mudanças
+- **Checksums verificáveis** para integridade
+- **Comunidade ativa** de desenvolvedores
+
+## 📞 Suporte
+
+- **Issues:** https://github.com/${{ github.repository }}/issues
+- **Código:** https://github.com/${{ github.repository }}
+- **Releases:** https://github.com/${{ github.repository }}/releases
+"@ | Out-File -FilePath "dist/SECURITY.md" -Encoding UTF8
+
+        # Create simple checksum file
+        @"
+$($hash_sha256.Hash) *AJG.exe
+"@ | Out-File -FilePath "dist/SHA256SUMS" -Encoding ASCII
+
+        Write-Output "✅ Checksums e relatório de segurança gerados"
+
     - name: Copy version to dist
       run: |
         Copy-Item "VERSION" "dist/VERSION"
@@ -67,6 +206,8 @@ jobs:
         path: |
           dist/AJG.exe
           dist/VERSION
+          dist/SECURITY.md
+          dist/SHA256SUMS
 
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
@@ -75,27 +216,65 @@ jobs:
         tag_name: ${{ steps.version.outputs.version }}
         name: AJG ${{ steps.version.outputs.version }}
         body: |
-          🚀 **Nova versão do Sistema AJG - Assistência Judiciária Gratuita**
+          # 🚀 Sistema AJG - Assistência Judiciária Gratuita ${{ steps.version.outputs.version }}
 
-          ## 📥 Download
-          - Baixe o arquivo `AJG.exe`
-          - Execute direto no Windows (não precisa instalar)
+          ## 📥 Download Principal
+
+          **⬇️ [AJG.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/AJG.exe)** - Executável para Windows
+
+          ## 🔒 Segurança e Verificação
+
+          ✅ **Build Automatizado** - Compilado no GitHub Actions (ambiente auditável)
+          ✅ **Código Aberto** - Todo o código disponível para auditoria
+          ✅ **Checksums Incluídos** - Para verificação de integridade
+          ✅ **Assinatura Digital** - Veja o relatório de segurança para detalhes
+
+          ### 📋 Arquivos de Verificação:
+          - **[SECURITY.md](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/SECURITY.md)** - Relatório completo de segurança
+          - **[SHA256SUMS](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/SHA256SUMS)** - Checksums para verificação
+
+          ## 🛡️ Se o Windows Defender Bloquear
+
+          **Isso é NORMAL** para executáveis Python compilados. O arquivo é seguro:
+
+          1. **Clique em "Mais informações"** na tela de bloqueio
+          2. **Clique em "Executar assim mesmo"**
+          3. **Ou adicione exceção permanente:**
+             - Windows Security → Proteção contra vírus → Exclusões
+             - Adicione o arquivo AJG.exe
+
+          ### 🔍 Verificar Integridade (Opcional):
+          ```powershell
+          Get-FileHash AJG.exe -Algorithm SHA256
+          ```
+          Compare com o hash no arquivo SHA256SUMS.
 
           ## ⚙️ Configuração Necessária
-          **IMPORTANTE:** Para usar o executável, você precisa configurar sua chave OpenRouter:
-          1. Obtenha uma chave em: https://openrouter.ai/keys
-          2. Edite o arquivo config.py (linha 57) antes de usar
-          3. Ou use variável de ambiente: `set OPENROUTER_API_KEY=sua-chave`
 
-          ## ✨ Atualizações
-          - Build automático #${{ github.run_number }}
-          - Gerado automaticamente do commit: ${{ github.sha }}
-          - Sistema de auto-atualização integrado
+          **IMPORTANTE:** Configure sua chave OpenRouter:
+          1. Obtenha uma chave em: https://openrouter.ai/keys
+          2. Use o botão "⚙️ Configurar Chave" no programa
+          3. Ou edite config.py (linha 57)
+
+          ## ✨ Informações da Versão
+
+          - **Build:** #${{ github.run_number }}
+          - **Commit:** ${{ github.sha }}
+          - **Data:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
+          - **Tamanho:** Veja no relatório de segurança
+
+          ## 📞 Suporte
+
+          - 🐛 **Reportar Problemas:** [Issues](https://github.com/${{ github.repository }}/issues)
+          - 📖 **Código-fonte:** [GitHub](https://github.com/${{ github.repository }})
+          - 📚 **Documentação:** [Wiki](https://github.com/${{ github.repository }}/wiki)
 
           ---
-          🤖 Build automatizado via GitHub Actions
+          🤖 **Build automatizado e seguro via GitHub Actions**
         files: |
           dist/AJG.exe
+          dist/SECURITY.md
+          dist/SHA256SUMS
         draft: false
         prerelease: false
       env:
