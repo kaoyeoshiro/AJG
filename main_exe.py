@@ -249,12 +249,12 @@ def parse_xml_processo(xml_text: str) -> Dict[str, Any]:
                 if nome:
                     data["partes"][polo].append({"nome": nome, "assistenciaJudiciaria": ajg})
 
-    # Movimentos
+    # Movimentos - AGORA COLETA TODOS OS MOVIMENTOS COM DESCRIÇÃO
     movimentos = root.findall(".//ns2:movimento", NS)
     logger.debug("Total de movimentos no XML: %d", len(movimentos))
 
-    filtrados = 0
     com_codigo = 0
+    com_descricao = 0
 
     for mov in movimentos:
         # Códigos e descrições podem aparecer em movimentoLocal e/ou movimentoLocalPai
@@ -286,34 +286,34 @@ def parse_xml_processo(xml_text: str) -> Dict[str, Any]:
         if cods:
             com_codigo += 1
 
-        # Filtra por 3 (decisão) ou 11009 (despacho)
-        match = None
-        for c in cods:
-            if c in ("3", "11009"):
-                match = c
-                break
-        if not match:
+        # MUDANÇA: Agora coleta TODOS os movimentos que tenham descrição
+        # Prioriza códigos 3 (decisão) e 11009 (despacho), mas inclui todos
+        if not descrs:
+            descrs = _all_texts(mov, "descricao")
+
+        # Só adiciona se tiver descrição (para não poluir com movimentos vazios)
+        if not descrs:
             continue
 
-        filtrados += 1
+        com_descricao += 1
+
+        # Pega o primeiro código disponível (se houver)
+        codigo_principal = cods[0] if cods else None
 
         dataHora = _pretty_esaj_dt(mov.attrib.get("dataHora"))
         complementos = _all_texts(mov, "complemento")
         complemento_txt = "\n---\n".join(complementos) if complementos else ""
-
-        if not descrs:
-            descrs = _all_texts(mov, "descricao")
         descricao_final = descrs[0] if descrs else None
 
         data["decisoes"].append({
-            "codigoPaiNacional": match,
+            "codigoPaiNacional": codigo_principal,
             "descricao": descricao_final,
             "dataHora": dataHora,
             "complemento": complemento_txt
         })
 
     logger.info("Movimentos com algum codigoPaiNacional: %d", com_codigo)
-    logger.info("Movimentos filtrados (3/11009): %d", filtrados)
+    logger.info("Movimentos com descrição coletados: %d", com_descricao)
     return data
 
 # =========================
@@ -355,13 +355,23 @@ DADOS EVIDENCIAIS (JSON):
 2. **Confirmação da Gratuidade da Justiça**
    - Esclareça, para cada parte, se o sistema do TJ-MS indica a gratuidade da justiça.
    - Verifique se há decisão nos autos que conceda a gratuidade e transcreva o trecho relevante entre aspas.
-   - Quando houver mais de uma parte autora e a decisão ou despacho do juiz simplesmente deferir a justiça gratuita, significa que todos tiveram o benefício concedido.
+   - **IMPORTANTE - IDENTIFICAÇÃO DO BENEFICIÁRIO:**
+     * Analise CUIDADOSAMENTE a descrição de cada decisão/despacho para identificar QUEM é o beneficiário da justiça gratuita.
+     * Procure por nomes específicos, termos como "parte autora", "requerente", "autor", "réu", "executado", etc.
+     * Se a decisão mencionar nome específico de uma parte (ex: "Defiro a gratuidade a João da Silva"), associe ao nome correspondente no polo processual.
+     * Se a decisão usar termo genérico mas houver apenas UMA parte naquele polo (ex: "Defiro ao autor" e só há um autor), associe àquela parte específica.
+     * Se a decisão usar termo genérico e houver MÚLTIPLAS partes no polo (ex: "Defiro aos autores" e há 3 autores), considere que TODAS as partes daquele polo foram beneficiadas.
+     * Se houver DÚVIDA sobre quem é o beneficiário, indique explicitamente no relatório: "⚠️ REVISÃO NECESSÁRIA: Não foi possível identificar com certeza qual parte foi beneficiada por esta decisão. Verificar manualmente."
    - Diferencie expressamente:
      (a) quando o sistema aponta gratuidade mas não há decisão confirmatória;
-     (b) quando existe decisão judicial concedendo a gratuidade;
-     (c) quando não se identificam elementos.
-   - Para cada parte, use o formato: **Nome da Parte**: [informação sobre gratuidade do sistema] + [informação sobre decisão judicial].
-   - Se identificar decisão deferindo gratuidade, mas não identificar a parte beneficiária, indique isso no relatório.
+     (b) quando existe decisão judicial concedendo a gratuidade com beneficiário claramente identificado;
+     (c) quando existe decisão judicial mas o beneficiário é ambíguo ou incerto;
+     (d) quando não se identificam elementos.
+   - Para cada parte, use o formato: **Nome da Parte**: [informação sobre gratuidade do sistema] + [informação sobre decisão judicial com identificação do beneficiário].
+   - Exemplos de saída esperada:
+     * "**João da Silva**: Consta no sistema como beneficiário. Decisão confirmatória identificou especificamente esta parte como beneficiária: 'Defiro a gratuidade ao autor João da Silva' (Despacho, 01/01/2023)."
+     * "**Maria Santos**: Consta no sistema como beneficiária. Decisão deferindo gratuidade, mas ⚠️ REVISÃO NECESSÁRIA: o texto não especifica qual dos autores foi beneficiado."
+     * "**Pedro Oliveira**: Não consta no sistema. Há decisão deferindo gratuidade 'aos autores', mas há 3 autores no processo. ⚠️ REVISÃO NECESSÁRIA: confirmar se esta parte específica foi beneficiada."
 
 3. **Análise das Decisões proferidas no processo**
    - Informe apenas as decisões e despachos em que houve designação de perícia. Se não houver, informe que não há decisão ou despacho com designação de perícia.
@@ -432,25 +442,30 @@ A resposta deve ser redigida em **Markdown**, no formato de relatório jurídico
 # Relatório - Processo XXXXXXX-XX.XXXX.X.XX.XXXX
 
 ## 1. Partes, Polos Processuais e Gratuidade da Justiça
-- Apresente as partes separadas por polo processual ("polo ativo" e "polo passivo").  
-- Para cada parte, coloque o nome entre **asteriscos duplos** seguido de dois pontos.  
-- Informe, em linguagem natural:  
-  (a) se consta no sistema do TJ-MS como beneficiária da justiça gratuita;  
-  (b) se há decisão judicial confirmatória, transcrevendo o trecho relevante entre aspas;  
-  (c) se não há qualquer indicação.  
-- Quando houver decisão deferindo a gratuidade para o polo ativo de forma genérica, considerar todos beneficiados.  
-- Caso a decisão não identifique quem é a parte beneficiária, registrar essa observação.  
+- Apresente as partes separadas por polo processual ("polo ativo" e "polo passivo").
+- Para cada parte, coloque o nome entre **asteriscos duplos** seguido de dois pontos.
+- Informe, em linguagem natural:
+  (a) se consta no sistema do TJ-MS como beneficiária da justiça gratuita;
+  (b) se há decisão judicial confirmatória, transcrevendo o trecho relevante entre aspas E identificando SE POSSÍVEL qual parte específica foi beneficiada;
+  (c) se há dúvida sobre qual parte foi beneficiada, use o marcador "⚠️ REVISÃO NECESSÁRIA";
+  (d) se não há qualquer indicação.
+- **REGRA CRÍTICA DE IDENTIFICAÇÃO:**
+  * Se a decisão menciona nome específico, associe àquela parte.
+  * Se termo genérico com UMA parte no polo, associe àquela parte.
+  * Se termo genérico com MÚLTIPLAS partes no polo, considere todas beneficiadas.
+  * Se AMBÍGUO ou INCERTO, marque com "⚠️ REVISÃO NECESSÁRIA".
 
-**Formato obrigatório:**  
-**Nome da Parte**: [informação do sistema do TJ-MS] + [informação sobre decisão judicial].  
+**Formato obrigatório:**
+**Nome da Parte**: [informação do sistema do TJ-MS] + [informação sobre decisão judicial com identificação clara do beneficiário].
 
-**Exemplo de saída:**
+**Exemplos de saída:**
 
-**Polo ativo:**  
-- **Maria da Silva**: Consta no sistema do TJ-MS como beneficiária da justiça gratuita. Decisão confirmatória: *“Defiro a gratuidade de justiça à parte autora.”* (Despacho, 01/01/2023).  
-- **João Santos**: Consta no sistema como beneficiário da justiça gratuita. Não há decisão confirmatória nos autos.  
+**Polo ativo:**
+- **Maria da Silva**: Consta no sistema do TJ-MS como beneficiária da justiça gratuita. Decisão confirmatória identificou especificamente esta parte: *"Defiro a gratuidade de justiça à autora Maria da Silva."* (Despacho, 01/01/2023).
+- **João Santos**: Consta no sistema como beneficiário da justiça gratuita. Há decisão deferindo gratuidade aos autores de forma genérica (há 2 autores). Considera-se que ambos foram beneficiados: *"Defiro aos autores."* (Despacho, 01/01/2023).
+- **Pedro Costa**: Consta no sistema como beneficiário. Há decisão deferindo gratuidade, mas ⚠️ REVISÃO NECESSÁRIA: o texto não especifica qual dos 3 autores foi beneficiado: *"Defiro ao primeiro requerente."* (Despacho, 05/01/2023).
 
-**Polo passivo:**  
+**Polo passivo:**
 - **Banco X S.A.**: Não consta no sistema nem há decisão sobre o tema.  
 
 ## 2. Análise das Decisões Proferidas no Processo

@@ -15,7 +15,10 @@
       "Bash(findstr:*)",
       "Bash(pyinstaller:*)",
       "Bash(tasklist)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(if exist \"dist\\AJG.exe\" del \"dist\\AJG.exe\")",
+      "Bash(pip install:*)",
+      "Bash(del:*)"
     ],
     "deny": [],
     "ask": []

@@ -39,14 +39,14 @@ O Sistema de Relatórios TJ-MS é uma aplicação desktop que automatiza o proce
 
 4. **Execute o sistema**:
    ```bash
-   python main.py
+   python main_exe.py
    ```
 
 ### Usando o Executável
 
 Para uso em produção, baixe o executável mais recente em [Releases](https://github.com/kaoyeoshiro/AJG/releases):
 
-1. Baixe `RelatorioTJMS.exe`
+1. Baixe `AJG.exe`
 2. Execute o arquivo
 3. Na primeira execução, configure sua chave OpenRouter quando solicitado
 4. O sistema estará pronto para uso
@@ -58,7 +58,7 @@ Para uso em produção, baixe o executável mais recente em [Releases](https://g
 O sistema possui um gerenciador de chaves que facilita a configuração:
 
 **Primeira Execução:**
-1. Execute `RelatorioTJMS.exe`
+1. Execute `AJG.exe`
 2. Uma janela solicitará sua chave OpenRouter
 3. Acesse [openrouter.ai/keys](https://openrouter.ai/keys) para obter sua chave
 4. Cole a chave e clique "Salvar"
@@ -183,7 +183,7 @@ Crie templates personalizados:
 
 3. **Teste o executável**:
    ```bash
-   dist/RelatorioTJMS.exe
+   dist/AJG.exe
    ```
 
 ### Build Automático (GitHub Actions)
@@ -317,16 +317,20 @@ dist/
 ```
 projeto/
 ├── .github/workflows/          # GitHub Actions
-├── main.py                     # Aplicação principal (desenvolvimento)
-├── main_exe.py                # Aplicação principal (produção)
+├── scripts/                   # Scripts auxiliares
+│   ├── build.py              # Script de build
+│   ├── key_manager.py        # Gerenciador de chaves
+│   └── updater.py            # Sistema de atualização
+├── templates/                 # Templates DOCX/RTF
+├── tests/                     # Testes (para desenvolvimento futuro)
+├── main_exe.py                # Aplicação principal
 ├── config.py                  # Configurações
-├── build_exe.py               # Script de build
-├── build_with_key.py          # Build com chave integrada
-├── key_manager.py             # Gerenciador de chaves (auto-gerado)
+├── build_exe.py               # Script de build local
 ├── requirements.txt           # Dependências Python
-├── templates/                 # Templates DOCX
 ├── .env.example              # Exemplo de configuração
-└── dist/                     # Executável compilado
+├── AJG.spec                  # Configuração PyInstaller
+├── VERSION                    # Versão atual
+└── dist/                     # Executável compilado (ignorado)
 ```
 
 ### Contribuindo
@@ -342,13 +346,13 @@ projeto/
 Execute testes locais:
 ```bash
 # Teste manual completo
-python main.py
+python main_exe.py
 
 # Teste de build
 python build_exe.py
 
 # Teste do executável
-dist/RelatorioTJMS.exe
+dist/AJG.exe
 ```
 
 ## Monitoramento
@@ -387,10 +391,7 @@ curl https://api.github.com/repos/kaoyeoshiro/AJG/releases
 
 ### Documentação Adicional
 
-- **FEEDBACK_SETUP.md**: Guia detalhado do sistema de feedback
-- **CONFIGURACAO_SEGURA.md**: Práticas de segurança específicas
-- **README_AUTO_UPDATE.md**: Detalhes do sistema de atualizações
-- **INSTRUÇÕES_BUILD.md**: Processo completo de compilação
+Toda a documentação foi consolidada neste README principal para facilitar o acesso e manutenção.
 
 ---
 
